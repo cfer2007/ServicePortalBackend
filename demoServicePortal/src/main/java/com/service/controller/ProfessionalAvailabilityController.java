@@ -3,6 +3,7 @@ package com.service.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,24 +26,20 @@ public class ProfessionalAvailabilityController {
 	private ProfessionalAvailabilityRepository repo;
 	
 	@PostMapping("/add/list")
-	public List<ProfessionalAvailability> setList(@RequestBody List<ProfessionalAvailability> list) {
-		try {
-			repo.saveAll(list);
-			
-		}
-		catch (Exception e) {
-			// TODO: handle exception
-		}
-		return repo.findAll();
+	public ResponseEntity<?> setList(@RequestBody List<ProfessionalAvailability> list) {
+		repo.saveAll(list);
+		return ResponseEntity.ok("Schedules successfully added");
 	}
 	
 	@GetMapping("/get/{id}")
-	public List<ProfessionalAvailability> getProfessionalAvailabilitiesByProfessional(@PathVariable("id") Long id){
-		return repo.findByProfesionalId(id);
+	public ResponseEntity<List<ProfessionalAvailability>> getProfessionalAvailabilitiesByProfessional(@PathVariable Long id){
+		List<ProfessionalAvailability> list = repo.findByProfesionalId(id);		
+		return ResponseEntity.ok(list);
 	}
 	
 	@DeleteMapping("/delete/{id}")
-	public void deleteProfessionalAvailability(@PathVariable("id") Long id) {
+	public ResponseEntity<?> deleteProfessionalAvailability(@PathVariable("id") Long id) {
 		repo.deleteById(id);
+		return ResponseEntity.ok("Schedules deleted");
 	}
 }
