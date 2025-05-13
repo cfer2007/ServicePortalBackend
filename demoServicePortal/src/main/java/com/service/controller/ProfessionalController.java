@@ -28,7 +28,7 @@ public class ProfessionalController {
 	
 	@GetMapping("/get/{id}")
 	public ResponseEntity<Professional> getProfessional(@PathVariable Long id){
-		Professional p = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with ID " + id + " not found"));
+		Professional p = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 		return ResponseEntity.ok(p);
 	}
 	
@@ -40,7 +40,7 @@ public class ProfessionalController {
 	
 	@PutMapping("/edit/{id}")
 	public ResponseEntity<Professional> editProfessional(@PathVariable Long id, @RequestBody ProfessionalDTO dto) {
-		Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional not found"));
+		Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 		dto.updateEntity(existing);
 		Professional updated = repo.save(existing);
 		return ResponseEntity.ok(updated);

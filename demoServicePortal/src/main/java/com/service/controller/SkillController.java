@@ -33,7 +33,7 @@ public class SkillController {
 	
 	@PutMapping("/edit/{id}")
 	public ResponseEntity<Long> editSkill(@PathVariable Long id,@RequestBody SkillDTO dto) {
-		Skill existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Skill not found"));
+		Skill existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Skill "+dto.getName()+" not found",1002));
 		dto.updateEntity(existing);
 		Skill updated = repo.save(existing);		
 		return ResponseEntity.ok(updated.getSkillId());
