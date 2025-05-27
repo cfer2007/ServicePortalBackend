@@ -9,13 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Table(name="user")
-@Entity(name="user")
-public class User {
+@Table(name="Customer")
+@Entity(name="Customer")
+public class Customer {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long userId;
+	private Long customerId;
 	
 	@Column
 	private String name;
@@ -26,12 +26,12 @@ public class User {
 	@Column
 	private Date creationDate;
 
-	public Long getUserId() {
-		return userId;
+	public Long getCustomerId() {
+		return customerId;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
 	}
 
 	public String getName() {

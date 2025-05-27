@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.service.dto.ProfessionDTO;
@@ -31,8 +32,9 @@ public class ProfessionController {
 		Profession p = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Profession "+id+" not found",1001));
 		return ResponseEntity.ok(p);
 	}
-		
+	
 	@GetMapping("/all")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	  public ResponseEntity<List<Profession>> getAllProfessions() {
 		List<Profession> list = repo.findAll();
 		return ResponseEntity.ok(list);

@@ -24,8 +24,8 @@ public class Reservation {
 	private Professional professional;
 
 	@ManyToOne
-    @JoinColumn(name = "userId", referencedColumnName = "userId",nullable = false)
-	private User userId;
+    @JoinColumn(name = "customerId", referencedColumnName = "customerId",nullable = false)
+	private Customer customerId;
 	
 	@Column
 	private String estado;
@@ -51,13 +51,13 @@ public class Reservation {
 		this.professional = professional;
 	}
 
-	public User getUserId() {
-		return userId;
+	public Customer getCustomerId() {
+		return customerId;
 	}
 
-	public void setUserId(User userId) {
-		this.userId = userId;
-	}	
+	public void setCustomerId(Customer customerId) {
+		this.customerId = customerId;
+	}
 
 	public String getEstado() {
 		return estado;
