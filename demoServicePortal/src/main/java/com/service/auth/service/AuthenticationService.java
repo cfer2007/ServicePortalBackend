@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.service.auth.dto.LoginUserDto;
 import com.service.auth.dto.RegisterUserDto;
+import com.service.auth.enums.Role;
 import com.service.auth.model.User;
 import com.service.auth.repository.UserRepository;
 
@@ -30,10 +31,11 @@ public class AuthenticationService {
 
     public User signup(RegisterUserDto input) {
         User user = new User()
+        		.setRole(Role.USER)
                 .setFullName(input.getFullName())
-                .setEmail(input.getEmail())
+                .setEmail(input.getEmail())                
                 .setPassword(passwordEncoder.encode(input.getPassword()));
-
+        
         return userRepository.save(user);
     }
 

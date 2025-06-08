@@ -7,11 +7,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.service.auth.enums.Role;
+
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Table(name = "users")
 @Entity
@@ -38,13 +38,13 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
     
-    /*
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;*/
+    private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(/*new SimpleGrantedAuthority(role.name())*/);
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     public String getPassword() {
@@ -126,6 +126,15 @@ public class User implements UserDetails {
         return this;
     }
     
+	public Role getRole() {
+		return role;
+	}
+
+	public User setRole(Role role) {
+		this.role = role;
+		return this;
+	}
+
 	@Override
     public String toString() {
         return "User{" +
@@ -133,14 +142,10 @@ public class User implements UserDetails {
                 ", fullName='" + fullName + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
     }
-	/*
-	public enum Role {
-		 USER,
-		 ADMIN
-		}*/
 }
 

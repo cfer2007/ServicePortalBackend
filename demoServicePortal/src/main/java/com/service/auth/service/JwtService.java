@@ -51,9 +51,9 @@ public class JwtService {
             UserDetails userDetails,
             long expiration
     ) {
-    	/*extraClaims.put("roles", userDetails.getAuthorities().stream()
+    	extraClaims.put("role", userDetails.getAuthorities().stream()
     	        .map(GrantedAuthority::getAuthority)
-    	        .collect(Collectors.toList()));*/
+    	        .collect(Collectors.toList()));
     	
     	return Jwts
                 .builder()
