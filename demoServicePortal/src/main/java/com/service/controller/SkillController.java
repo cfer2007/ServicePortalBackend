@@ -26,7 +26,7 @@ public class SkillController {
 	}
 	
 	@GetMapping("/get/{id}")
-	public ResponseEntity<List<ISkillDTO>> getListSkillByProfession(@PathVariable Long id){
+	public ResponseEntity<List<ISkillDTO>> getListSkillsByProfession(@PathVariable Long id){
 		List<ISkillDTO> list = repo.findByProfessionId(id);
 		return ResponseEntity.ok(list);
 	}

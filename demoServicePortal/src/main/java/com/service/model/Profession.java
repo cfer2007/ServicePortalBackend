@@ -13,6 +13,9 @@ public class Profession {
 	@Column
 	private String name;
 	
+	@ManyToOne
+    @JoinColumn(name = "categoryId", referencedColumnName = "categoryId",nullable = false)
+	private Category category;	
 
 	public Long getProfessionId() {
 		return professionId;
@@ -28,5 +31,13 @@ public class Profession {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
 	}
 }

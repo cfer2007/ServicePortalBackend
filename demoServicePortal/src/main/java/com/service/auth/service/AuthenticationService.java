@@ -30,8 +30,10 @@ public class AuthenticationService {
     }
 
     public User signup(RegisterUserDto input) {
+    	Role rol = (input.getRole() != null) ? input.getRole() : Role.USER;
+    	
         User user = new User()
-        		.setRole(Role.USER)
+        		.setRole(rol)
                 .setFullName(input.getFullName())
                 .setEmail(input.getEmail())                
                 .setPassword(passwordEncoder.encode(input.getPassword()));

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.service.dto.IProfessionDTO;
 import com.service.dto.ProfessionDTO;
 import com.service.exception.ResourceNotFoundException;
 import com.service.model.Profession;
@@ -28,9 +29,9 @@ public class ProfessionController {
 	}
 	
 	@GetMapping("/get/{id}")
-	public ResponseEntity<Profession> getProfession(@PathVariable Long id){
-		Profession p = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Profession "+id+" not found",1001));
-		return ResponseEntity.ok(p);
+	public ResponseEntity<List<IProfessionDTO>>getListProfessionsByCategory(@PathVariable Long id){
+		List<IProfessionDTO> list = repo.findByCategoryId(id);
+		return ResponseEntity.ok(list);
 	}
 	
 	@GetMapping("/all")

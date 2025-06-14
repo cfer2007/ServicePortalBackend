@@ -1,8 +1,6 @@
 package com.service.auth.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.service.auth.enums.Role;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Table(name = "users")
@@ -29,15 +26,7 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String password;
-
-    @CreationTimestamp
-    @Column(updatable = false, name = "created_at")
-    private Date createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Date updatedAt;
-    
+   
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -107,7 +96,7 @@ public class User implements UserDetails {
         this.password = password;
         return this;
     }
-
+    /*
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -125,7 +114,7 @@ public class User implements UserDetails {
         this.updatedAt = updatedAt;
         return this;
     }
-    
+    */
 	public Role getRole() {
 		return role;
 	}
@@ -143,8 +132,8 @@ public class User implements UserDetails {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
+                //", createdAt=" + createdAt +
+                //", updatedAt=" + updatedAt +
                 '}';
     }
 }
