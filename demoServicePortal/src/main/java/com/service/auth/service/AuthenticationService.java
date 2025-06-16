@@ -1,5 +1,7 @@
 package com.service.auth.service;
 
+import java.util.List;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,10 +32,12 @@ public class AuthenticationService {
     }
 
     public User signup(RegisterUserDto input) {
-    	Role rol = (input.getRole() != null) ? input.getRole() : Role.USER;
+    	List<Role> roles = (input.getRoles() == null || input.getRoles().isEmpty())
+    			? List.of(Role.USER)
+    			: input.getRoles().stream().distinct().toList();
     	
         User user = new User()
-        		.setRole(rol)
+        		.setRoles(roles)
                 .setFullName(input.getFullName())
                 .setEmail(input.getEmail())                
                 .setPassword(passwordEncoder.encode(input.getPassword()));
@@ -52,4 +56,19 @@ public class AuthenticationService {
         return userRepository.findByEmail(input.getEmail())
                 .orElseThrow();
     }
+    /*
+    public String setRoleToUser(String email, Role newRole) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con email: " + email));
+
+        List<Role> currentRoles = user.getRoles();
+
+        if (!currentRoles.contains(newRole)) {
+            currentRoles.add(newRole);
+            user.setRoles(currentRoles);
+            userRepository.save(user);
+            return "Rol asignado";
+        }
+        else return "El usuario ya tiene asignado el Rol";
+    }*/
 }

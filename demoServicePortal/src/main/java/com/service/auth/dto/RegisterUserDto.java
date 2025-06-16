@@ -1,5 +1,7 @@
 package com.service.auth.dto;
 
+import java.util.List;
+
 import com.service.auth.enums.Role;
 
 public class RegisterUserDto {
@@ -9,7 +11,7 @@ public class RegisterUserDto {
     
     private String fullName;
     
-    private Role role;
+    private List<Role> roles;
 
 	public String getEmail() {
 		return email;
@@ -35,13 +37,13 @@ public class RegisterUserDto {
 		this.fullName = fullName;
 	}
 	
-	public Role getRole() {
-		return role;
-	}
+	public List<Role> getRoles() {
+        return roles;
+    }
 
-	public void setRole(Role role) {
-		this.role = role;
-	}
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
 
 
 
@@ -49,7 +51,7 @@ public class RegisterUserDto {
 		 private String email;
 		 private String password;
 		 private String fullName;
-		 private Role role;
+		 private List<Role> roles;
 		
 		public Builder setEmail(String email) {
 			this.email = email;
@@ -66,23 +68,23 @@ public class RegisterUserDto {
 			return this;
 		}
 		
-		public Builder setRole(Role role) {
-			this.role = role;
+		public Builder setRoles(List<Role> roles) {
+			this.roles = roles;
 			return this;
 		}
 		 
 		public RegisterUserDto build() {
-			return new RegisterUserDto(email,password,fullName, role);
+			return new RegisterUserDto(email,password,fullName, roles);
 		}
 		 
 	}
 
-	public RegisterUserDto(String email, String password, String fullName, Role role) {
+	public RegisterUserDto(String email, String password, String fullName, List<Role> roles) {
 		super();
 		this.email = email;
 		this.password = password;
 		this.fullName = fullName;
-		this.role = role;
+		this.roles = roles;
 	}
 	
    

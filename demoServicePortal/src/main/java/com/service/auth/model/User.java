@@ -13,7 +13,9 @@ import java.util.List;
 @Table(name = "users")
 @Entity
 public class User implements UserDetails {
-    @Id
+    private static final long serialVersionUID = 1L;
+
+	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Integer id;
@@ -27,13 +29,21 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
    
-    @Column(nullable = false)
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @CollectionTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role"})
+    )
+    @Column(name = "role")
+    private List<Role> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return roles.stream()
+                    .map(role -> new SimpleGrantedAuthority(role.name()))
+                    .toList();
     }
 
     public String getPassword() {
@@ -115,14 +125,14 @@ public class User implements UserDetails {
         return this;
     }
     */
-	public Role getRole() {
-		return role;
-	}
+    public List<Role> getRoles() {
+        return roles;
+    }
 
-	public User setRole(Role role) {
-		this.role = role;
-		return this;
-	}
+    public User setRoles(List<Role> roles) {
+        this.roles = roles;
+        return this;
+    }
 
 	@Override
     public String toString() {
@@ -131,7 +141,7 @@ public class User implements UserDetails {
                 ", fullName='" + fullName + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
+                ", roles='" + roles + '\'' +
                 //", createdAt=" + createdAt +
                 //", updatedAt=" + updatedAt +
                 '}';

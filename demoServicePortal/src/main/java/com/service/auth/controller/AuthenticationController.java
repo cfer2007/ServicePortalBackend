@@ -1,13 +1,16 @@
 package com.service.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.service.auth.dto.LoginUserDto;
 import com.service.auth.dto.RegisterUserDto;
+import com.service.auth.enums.Role;
 import com.service.auth.model.User;
 import com.service.auth.response.LoginResponse;
 import com.service.auth.service.AuthenticationService;
