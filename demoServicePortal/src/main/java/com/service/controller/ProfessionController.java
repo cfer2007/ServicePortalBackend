@@ -35,7 +35,7 @@ public class ProfessionController {
 	}
 	
 	@GetMapping("/all")
-	@PreAuthorize("hasAuthority('ADMIN')")
+	//@PreAuthorize("hasAuthority('ADMIN')")
 	  public ResponseEntity<List<Profession>> getAllProfessions() {
 		List<Profession> list = repo.findAll();
 		return ResponseEntity.ok(list);

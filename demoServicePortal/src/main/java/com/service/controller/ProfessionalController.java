@@ -25,11 +25,25 @@ public class ProfessionalController {
 		Professional newProfessional = repo.save(dto.toEntity());
 	    return ResponseEntity.ok(newProfessional);
 	}
-	
+	/*
 	@GetMapping("/get/{id}")
 	public ResponseEntity<Professional> getProfessional(@PathVariable Long id){
 		Professional p = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 		return ResponseEntity.ok(p);
+	}
+	*/
+	
+	@GetMapping("/get/{email}")
+	public ResponseEntity<Professional> getProfessionalByEmail(@PathVariable String email){
+		Professional p = repo.findByEmail(email);
+		return ResponseEntity.ok(p);
+	}
+	
+	@GetMapping("/getList/{id}")
+	public ResponseEntity<List<Professional>> getProfessionalBySkill(@PathVariable Long id){
+		List<Professional> list = repo.findProfessionalsBySkill(id);
+		
+		return ResponseEntity.ok(list);
 	}
 	
 	@GetMapping("/all")

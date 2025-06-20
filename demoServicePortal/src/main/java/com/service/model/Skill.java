@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 @Entity(name="skill")
 public class Skill {
 	
+	public Skill() {}
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long skillId;

@@ -34,7 +34,7 @@ public class CategoryController {
 	}
 	
 	@GetMapping("/all")
-	@PreAuthorize("hasAuthority('ADMIN')")
+	//@PreAuthorize("hasAuthority('ADMIN')")
 	 public ResponseEntity<List<Category>> getAllCategories() {
 		List<Category> list = repo.findAll();
 		return ResponseEntity.ok(list);
