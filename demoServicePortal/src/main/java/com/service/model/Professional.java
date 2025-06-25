@@ -10,9 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 
-@Table(name="professional",uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
+@Table(name="professional")
 @Entity(name="professional")
 public class Professional {
 	

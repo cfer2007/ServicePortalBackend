@@ -2,8 +2,6 @@ package com.service.dto;
 
 import com.service.model.Profession;
 import com.service.model.Professional;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 
 public class ProfessionalDTO {
 
