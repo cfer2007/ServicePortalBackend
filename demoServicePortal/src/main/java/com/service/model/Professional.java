@@ -27,6 +27,21 @@ public class Professional {
 	@Column
 	private String lastName;
 	
+	@Column
+	private String title;
+	
+	@Column
+	private String about;
+	
+	@Column
+	private String experienceYears;
+	
+	@Column
+	private float rate;
+	
+	@Column
+	private String rate_type;
+	
 	@ManyToOne
     @JoinColumn(name = "professionId", referencedColumnName = "professionId",nullable = true)
 	private Profession profession;
@@ -57,6 +72,46 @@ public class Professional {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getAbout() {
+		return about;
+	}
+
+	public void setAbout(String about) {
+		this.about = about;
+	}
+
+	public String getExperienceYears() {
+		return experienceYears;
+	}
+
+	public void setExperienceYears(String experienceYears) {
+		this.experienceYears = experienceYears;
+	}
+
+	public float getRate() {
+		return rate;
+	}
+
+	public void setRate(float rate) {
+		this.rate = rate;
+	}
+
+	public String getRate_type() {
+		return rate_type;
+	}
+
+	public void setRate_type(String rate_type) {
+		this.rate_type = rate_type;
 	}
 
 	public Profession getProfession() {

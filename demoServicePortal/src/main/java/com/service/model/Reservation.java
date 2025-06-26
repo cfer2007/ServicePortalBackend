@@ -32,7 +32,7 @@ public class Reservation {
     @JoinColumn(name = "professionalAvailabilityId", referencedColumnName = "professionalAvailabilityId",nullable = true)
 	private ProfessionalAvailability professionalAvailability;
 	
-	@Column//(pattern = "dd/MM/yyyy")
+	@Column//(pattern = "dd/MM/yyyy HH:MM")
     private String reservationDate;
 	
 	@Column

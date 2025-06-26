@@ -9,6 +9,16 @@ public class ProfessionalDTO {
 
  private String lastName;
  
+ private String title;
+	
+ private String about;
+	
+ private String experienceYears;
+	
+ private float rate;
+ 
+ private String rate_type;
+ 
  private Long professionId;
 
  public String getName() {
@@ -27,6 +37,46 @@ public class ProfessionalDTO {
 		this.lastName = lastName;
 	}
 	
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getAbout() {
+		return about;
+	}
+
+	public void setAbout(String about) {
+		this.about = about;
+	}
+
+	public String getExperienceYears() {
+		return experienceYears;
+	}
+
+	public void setExperienceYears(String experienceYears) {
+		this.experienceYears = experienceYears;
+	}
+
+	public float getRate() {
+		return rate;
+	}
+
+	public void setRate(float rate) {
+		this.rate = rate;
+	}
+
+	public String getRate_type() {
+		return rate_type;
+	}
+
+	public void setRate_type(String rate_type) {
+		this.rate_type = rate_type;
+	}
+
 	public Long getProfessionId() {
 		return professionId;
 	}
@@ -40,6 +90,7 @@ public class ProfessionalDTO {
 	    Professional p = new Professional();
 	    p.setName(this.name);
 	    p.setLastName(this.lastName);
+	   
 	    return p;
 	}
 	
@@ -49,6 +100,11 @@ public class ProfessionalDTO {
 	    entity.setName(this.name);
 	    entity.setLastName(this.lastName);
 	    entity.setProfession(profession);	
+	    entity.setTitle(this.title);
+	    entity.setAbout(this.about);
+	    entity.setExperienceYears(this.experienceYears);
+	    entity.setRate_type(this.rate_type);
+	    entity.setRate(this.rate);
 	}
 }
 
