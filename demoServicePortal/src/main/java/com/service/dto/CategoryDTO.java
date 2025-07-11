@@ -16,12 +16,12 @@ public class CategoryDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+	/*
 	public Category toEntity() {
 		Category c = new Category();
 		c.setName(this.name);
 		return c;
-	}
+	}*/
 	
 	public void updateEntity(Category entity) {
 		entity.setName(name);

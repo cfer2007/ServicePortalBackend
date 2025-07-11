@@ -46,7 +46,8 @@ public class JwtService {
         return jwtExpiration;
     }
 
-    private String buildToken(
+    @SuppressWarnings("deprecation")
+	private String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
             long expiration
@@ -78,7 +79,8 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public Claims extractAllClaims(String token) {
+    @SuppressWarnings("deprecation")
+	public Claims extractAllClaims(String token) {
        
     	return Jwts
     			.parser()

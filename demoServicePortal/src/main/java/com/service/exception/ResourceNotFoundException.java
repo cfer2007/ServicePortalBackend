@@ -1,5 +1,6 @@
 package com.service.exception;
 
+@SuppressWarnings("serial")
 public class ResourceNotFoundException extends RuntimeException {
     private final int errorCode;
 

@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.service.dto.IProfessionalSkillDTO;
-import com.service.model.Professional;
 import com.service.model.ProfessionalSkill;
 import com.service.repository.ProfessionalSkillRepository;
 

@@ -90,7 +90,6 @@ public class ProfessionalDTO {
 	    Professional p = new Professional();
 	    p.setName(this.name);
 	    p.setLastName(this.lastName);
-	   
 	    return p;
 	}
 	
