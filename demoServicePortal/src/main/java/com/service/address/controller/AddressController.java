@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.service.address.dto.AddressDTO;
+import com.service.address.dto.ProfessionalAddressDTO;
+import com.service.address.dto.IAddressDTO;
 import com.service.address.model.Address;
 import com.service.address.repository.AddressRepository;
 import com.service.exception.ResourceNotFoundException;
@@ -25,9 +26,15 @@ public class AddressController {
 	@Autowired
 	private AddressRepository repo;
 	
+	/*
 	@PostMapping("/add")
 	public ResponseEntity<Address> setAddress(@RequestBody Address address){
 		Address newAddress = repo.save(address);
+		return ResponseEntity.ok(newAddress);
+	}*/
+	@PostMapping("/add/professional")
+	public ResponseEntity<Address> setAddress(@RequestBody ProfessionalAddressDTO dto){
+		Address newAddress = repo.save(dto.toEntity());
 		return ResponseEntity.ok(newAddress);
 	}
 	
@@ -38,13 +45,13 @@ public class AddressController {
 	}
 	
 	@GetMapping("/get/professional/{id}")
-	public ResponseEntity<List<Address>> getAddressByProfessionalId(@PathVariable Long id){
-		List<Address> list = repo.getAddressesByProfessionalId(id);
+	public ResponseEntity<List<IAddressDTO>> getAddressByProfessionalId(@PathVariable Long id){
+		List<IAddressDTO> list = repo.getAddressesByProfessionalId(id);
 		return ResponseEntity.ok(list);
 	}
 	
-	@PutMapping("/edit/{id}")
-	public ResponseEntity<Address> editAddress(@PathVariable Long id, @RequestBody AddressDTO dto){
+	@PutMapping("/edit/professional/{id}")
+	public ResponseEntity<Address> editAddress(@PathVariable Long id, @RequestBody ProfessionalAddressDTO dto){
 		Address existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Address "+id+" not found", 1003));
 		dto.updateEntity(existing);
 		Address updated = repo.save(existing);		

@@ -21,6 +21,9 @@ public class Address {
 	private Long addressId;
 	
 	@Column
+	private String name;
+	
+	@Column
 	private String streetAddress;
 	
 	@Column
@@ -30,16 +33,16 @@ public class Address {
 	private Double longitude;
 	
 	@ManyToOne
-	@JoinColumn(name = "clientId", referencedColumnName = "clientId", nullable = false)
+	@JoinColumn(name = "clientId", referencedColumnName = "clientId", nullable = true)
 	private Client client;
 	
 	@ManyToOne
-	@JoinColumn(name = "professionalId", referencedColumnName = "professionalId", nullable = false)
+	@JoinColumn(name = "professionalId", referencedColumnName = "professionalId", nullable = true)
 	private Professional professional;
 	
 	@ManyToOne
-	@JoinColumn(name = "areaId", referencedColumnName = "areaId", nullable = false)
-	private Area area;
+	@JoinColumn(name = "cityId", referencedColumnName = "cityId", nullable = false)
+	private City city;
 
 	public Long getAddressId() {
 		return addressId;
@@ -47,6 +50,14 @@ public class Address {
 
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getStreetAddress() {
@@ -89,11 +100,11 @@ public class Address {
 		this.professional = professional;
 	}
 
-	public Area getArea() {
-		return area;
+	public City getCity() {
+		return city;
 	}
 
-	public void setArea(Area area) {
-		this.area = area;
+	public void setCity(City city) {
+		this.city = city;
 	}
 }

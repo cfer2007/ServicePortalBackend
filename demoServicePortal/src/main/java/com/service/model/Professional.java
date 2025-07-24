@@ -42,6 +42,8 @@ public class Professional {
 	@Column
 	private String rate_type;
 	
+	private String modality;
+	
 	@ManyToOne
     @JoinColumn(name = "professionId", referencedColumnName = "professionId",nullable = true)
 	private Profession profession;
@@ -116,6 +118,14 @@ public class Professional {
 
 	public Profession getProfession() {
 		return profession;
+	}
+
+	public String getModality() {
+		return modality;
+	}
+
+	public void setModality(String modality) {
+		this.modality = modality;
 	}
 
 	public void setProfession(Profession profession) {
