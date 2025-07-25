@@ -2,16 +2,17 @@ package com.service.address.dto;
 
 import com.service.address.model.Address;
 import com.service.address.model.City;
+import com.service.model.Client;
 import com.service.model.Professional;
 
-public class ProfessionalAddressDTO {
+public class ClientAddressDTO {
 
 	private String name;
 	private String StreetAddress;
 	private Double latitude;
 	private Double longitude;
-	//private Long clientId;
-	private Long ProfessionalId;
+	private Long clientId;
+	//private Long ProfessionalId;
 	private Long cityId;
 		
 	public String getName() {
@@ -38,18 +39,18 @@ public class ProfessionalAddressDTO {
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	/*public Long getClientId() {
+	public Long getClientId() {
 		return clientId;
 	}
 	public void setClientId(Long clientId) {
 		this.clientId = clientId;
-	}*/
-	public Long getProfessionalId() {
+	}
+	/*public Long getProfessionalId() {
 		return ProfessionalId;
 	}
 	public void setProfessionalId(Long professionalId) {
 		ProfessionalId = professionalId;
-	}	
+	}*/	
 	public Long getCityId() {
 		return cityId;
 	}
@@ -61,16 +62,16 @@ public class ProfessionalAddressDTO {
 		City c = new City();
 		c.setCityId(this.cityId);
 		
-		Professional p = new Professional();
-		p.setProfessionalId(this.ProfessionalId);
+		//Professional p = new Professional();
+		//p.setProfessionalId(this.ProfessionalId);
 		
-		//Client cli = new Client();
-		//cli.setClientId(this.clientId);
+		Client cli = new Client();
+		cli.setClientId(this.clientId);
 		
 		Address a = new Address();
 		a.setCity(c);
-		a.setProfessional(p);
-		//a.setClient(cli);
+		//a.setProfessional(p);
+		a.setClient(cli);
 		a.setName(this.name);
 		a.setStreetAddress(this.StreetAddress);
 		
@@ -81,15 +82,15 @@ public class ProfessionalAddressDTO {
 		City city = new City();
 		city.setCityId(this.cityId);
 		
-		//Client client = new Client();
-		//client.setClientId(this.clientId);
+		Client client = new Client();
+		client.setClientId(this.clientId);
 		
-		Professional professional = new Professional();
-		professional.setProfessionalId(this.ProfessionalId);
+		//Professional professional = new Professional();
+		//professional.setProfessionalId(this.ProfessionalId);
 		
 		entity.setCity(city);
-		//entity.setClient(client);
-		entity.setProfessional(professional);
+		entity.setClient(client);
+		//entity.setProfessional(professional);
 		entity.setName(this.name);
 		entity.setStreetAddress(this.StreetAddress);
 		entity.setLatitude(this.latitude);

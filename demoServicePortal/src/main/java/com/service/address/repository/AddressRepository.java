@@ -10,8 +10,12 @@ import com.service.address.model.Address;
 
 public interface AddressRepository extends JpaRepository<Address, Long>{
 
-	@Query(value = "select * from address where client_id =?1", nativeQuery = true)
-	List<Address> getAdressesByClientId(Long id);
+	@Query(value = "select a.name, a.address_id as addressId, r.region_id as regionId, r.name as regionName, a.city_id as cityId, c.name as cityName, a.street_address as streetAddress\n"
+			+ "from address a, city c, region r\n"
+			+ "where client_id = ?1\n"
+			+ "and a.city_id=c.city_id\n"
+			+ "and c.region_id=r.region_id", nativeQuery = true)
+	List<IAddressDTO> getAdressesByClientId(Long id);
 	
 	@Query(value = "select a.name, a.address_id as addressId, r.region_id as regionId, r.name as regionName, a.city_id as cityId, c.name as cityName, a.street_address as streetAddress\n"
 			+ "from address a, city c, region r\n"

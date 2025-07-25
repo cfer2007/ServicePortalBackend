@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.service.address.dto.ProfessionalAddressDTO;
+import com.service.address.dto.ClientAddressDTO;
 import com.service.address.dto.IAddressDTO;
 import com.service.address.model.Address;
 import com.service.address.repository.AddressRepository;
@@ -33,14 +34,20 @@ public class AddressController {
 		return ResponseEntity.ok(newAddress);
 	}*/
 	@PostMapping("/add/professional")
-	public ResponseEntity<Address> setAddress(@RequestBody ProfessionalAddressDTO dto){
+	public ResponseEntity<Address> setProfessionlAddress(@RequestBody ProfessionalAddressDTO dto){
+		Address newAddress = repo.save(dto.toEntity());
+		return ResponseEntity.ok(newAddress);
+	}
+	
+	@PostMapping("/add/client")
+	public ResponseEntity<Address> setClientAddress(@RequestBody ClientAddressDTO dto){
 		Address newAddress = repo.save(dto.toEntity());
 		return ResponseEntity.ok(newAddress);
 	}
 	
 	@GetMapping("/get/client/{id}")
-	public ResponseEntity<List<Address>> getAddressByClientId(@PathVariable Long id){
-		List<Address> list = repo.getAdressesByClientId(id);
+	public ResponseEntity<List<IAddressDTO>> getAddressByClientId(@PathVariable Long id){
+		List<IAddressDTO> list = repo.getAdressesByClientId(id);
 		return ResponseEntity.ok(list);
 	}
 	
@@ -51,7 +58,15 @@ public class AddressController {
 	}
 	
 	@PutMapping("/edit/professional/{id}")
-	public ResponseEntity<Address> editAddress(@PathVariable Long id, @RequestBody ProfessionalAddressDTO dto){
+	public ResponseEntity<Address> editProfessionalAddress(@PathVariable Long id, @RequestBody ProfessionalAddressDTO dto){
+		Address existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Address "+id+" not found", 1003));
+		dto.updateEntity(existing);
+		Address updated = repo.save(existing);		
+		return ResponseEntity.ok(updated);
+	}
+	
+	@PutMapping("/edit/client/{id}")
+	public ResponseEntity<Address> editClientAddress(@PathVariable Long id, @RequestBody ClientAddressDTO dto){
 		Address existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Address "+id+" not found", 1003));
 		dto.updateEntity(existing);
 		Address updated = repo.save(existing);		
