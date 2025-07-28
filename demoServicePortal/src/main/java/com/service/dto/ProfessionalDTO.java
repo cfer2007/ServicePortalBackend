@@ -20,6 +20,8 @@ public class ProfessionalDTO {
  private String rate_type;
  
  private Long professionId;
+ 
+ private String modality;
 
  public String getName() {
 	return name;
@@ -85,6 +87,14 @@ public class ProfessionalDTO {
 		this.professionId = professionId;
 	}
 	
+	public String getModality() {
+		return modality;
+	}
+
+	public void setModality(String modality) {
+		this.modality = modality;
+	}
+
 	public Professional toEntity() {
 		
 	    Professional p = new Professional();
@@ -104,6 +114,10 @@ public class ProfessionalDTO {
 	    entity.setExperienceYears(this.experienceYears);
 	    entity.setRate_type(this.rate_type);
 	    entity.setRate(this.rate);
+	}
+	
+	public void updateModality(Professional entity) {
+		entity.setModality(this.modality);
 	}
 }
 

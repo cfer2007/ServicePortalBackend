@@ -28,6 +28,9 @@ public class Professional {
 	private String lastName;
 	
 	@Column
+	private String phone;
+	
+	@Column
 	private String title;
 	
 	@Column
@@ -42,6 +45,7 @@ public class Professional {
 	@Column
 	private String rate_type;
 	
+	@Column
 	private String modality;
 	
 	@ManyToOne
@@ -74,6 +78,14 @@ public class Professional {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 	public String getTitle() {

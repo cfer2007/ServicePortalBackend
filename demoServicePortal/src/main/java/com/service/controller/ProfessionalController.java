@@ -60,6 +60,14 @@ public class ProfessionalController {
 		return ResponseEntity.ok(updated);
 	}
 	
+	@PutMapping("/edit/modality/{id}")
+	public ResponseEntity<Professional> editModalityProfessional(@PathVariable Long id, @RequestBody ProfessionalDTO dto) {
+		Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
+		dto.updateModality(existing);
+		Professional updated = repo.save(existing);
+		return ResponseEntity.ok(updated);
+	}
+	
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<?> deleteProfessional(@PathVariable Long id) {
 		repo.deleteById(id);
