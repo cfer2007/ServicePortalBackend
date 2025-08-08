@@ -1,6 +1,7 @@
 package com.service.model;
 
 import com.service.auth.model.User;
+import com.service.enums.ProfileStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,8 +16,6 @@ import jakarta.persistence.Table;
 @Entity(name="professional")
 public class Professional {
 	
-	public Professional() {}
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long professionalId;
@@ -47,6 +46,9 @@ public class Professional {
 	
 	@Column
 	private String modality;
+	
+	@Column
+	private ProfileStatus status;
 	
 	@ManyToOne
     @JoinColumn(name = "professionId", referencedColumnName = "professionId",nullable = true)
@@ -126,11 +128,7 @@ public class Professional {
 
 	public void setRate_type(String rate_type) {
 		this.rate_type = rate_type;
-	}
-
-	public Profession getProfession() {
-		return profession;
-	}
+	}	
 
 	public String getModality() {
 		return modality;
@@ -140,6 +138,18 @@ public class Professional {
 		this.modality = modality;
 	}
 
+	public ProfileStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ProfileStatus status) {
+		this.status = status;
+	}
+
+	public Profession getProfession() {
+		return profession;
+	}
+	
 	public void setProfession(Profession profession) {
 		this.profession = profession;
 	}
@@ -148,7 +158,8 @@ public class Professional {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public Professional setUser(User user) {
 		this.user = user;
+		return this;
 	}
 }

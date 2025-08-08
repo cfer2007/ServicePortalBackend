@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.service.dto.AppointmentDTO;
-import com.service.enums.Status;
+import com.service.enums.ReservationStatus;
 import com.service.exception.ResourceNotFoundException;
 import com.service.model.Appointment;
 import com.service.repository.AppointmentRepository;
@@ -28,18 +28,16 @@ public class AppointmentController {
 	
 	@PostMapping("/add")
 	public ResponseEntity<Appointment> setAppointment(@RequestBody Appointment appointment) {
-		appointment.setStatus(Status.PENDING);
+		appointment.setStatus(ReservationStatus.PENDING);
 		Appointment app = repo.save(appointment);
 		return ResponseEntity.ok(app);
 	}
 	
 	@GetMapping("/list/professional/{id}")
 	public ResponseEntity<List<Appointment>> getAppointmentsByProfessional(@PathVariable Long id, @RequestParam String status) {
-		System.out.println(status);
-		
-		List<Status> statusList = Arrays.stream(status.split(","))
+		List<ReservationStatus> statusList = Arrays.stream(status.split(","))
                 .map(String::trim)
-                .map(Status::valueOf)
+                .map(ReservationStatus::valueOf)
                 .toList();
 		
 	    List<Appointment> list = repo.getAppointmentsByProfessional(id, statusList);

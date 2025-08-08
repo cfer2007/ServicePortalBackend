@@ -1,8 +1,14 @@
 package com.service.auth.service;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
+
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,73 +48,75 @@ public class AuthenticationService {
         this.professionalRepository = professionalRepository;
     }
 
-    public User signup(RegisterUserDto input) {
-        List<Role> requestedRoles = (input.getRoles() == null || input.getRoles().isEmpty())
-                ? List.of(Role.USER)
-                : input.getRoles().stream().distinct().toList();
+    public User signup(RegisterUserDto dto) {
 
-        User user = userRepository.findByEmail(input.getEmail()).orElse(null);
+        /* 1️⃣  Rol solicitado o el default */
+        Role requestedRole = dto.getRole() != null ? dto.getRole() : Role.USER;
+
+        /* 2️⃣  Conjunto con un solo rol (EnumSet es eficiente) */
+        Set<Role> requestedRoles = EnumSet.of(requestedRole);
+
+        /* 3️⃣  Buscar usuario por email */
+        User user = userRepository.findByEmail(dto.getEmail()).orElse(null);
 
         if (user == null) {
-            // Crear nuevo usuario
+            /* Nuevo usuario */
             user = new User()
-                    .setRoles(requestedRoles)
-                    .setFullName(input.getFullName())
-                    .setEmail(input.getEmail())
-                    .setPassword(passwordEncoder.encode(input.getPassword()));
-            user = userRepository.save(user);
+                    .setFullName(dto.getFullName())
+                    .setEmail(dto.getEmail())
+                    .setPassword(passwordEncoder.encode(dto.getPassword()))
+                    .setRoles(new ArrayList<>(requestedRoles));
+
+            userRepository.save(user);
         } else {
-            // Usuario ya existe, agregar nuevos roles si no están presentes
-            List<Role> existingRoles = user.getRoles();
-            boolean updated = false;
-
-            for (Role role : requestedRoles) {
-                if (!existingRoles.contains(role)) {
-                    existingRoles.add(role);
-                    updated = true;
-                }
+            /* Usuario existe: añade rol si no lo tiene */
+            boolean updated = user.getRoles().add(requestedRole);
+            if (!updated) {          // Ya tenía ese rol, salir rápido
+                return user;
             }
-
-            if (updated) {
-                user.setRoles(existingRoles);
-                user = userRepository.save(user);
-            }
+            userRepository.save(user);
         }
 
-        // Asociar perfil según roles (si aún no existe)
-        for (Role role : requestedRoles) {
-            switch (role) {
-                case USER -> {
-                    if (!clientRepository.existsByUserId(user.getId().longValue())) {
-                        Client cliente = new Client();
-                        cliente.setUser(user);
-                        clientRepository.save(cliente);
-                    }
-                }
-                case PROFESSIONAL -> {
-                    if (!professionalRepository.existsByUserId(user.getId().longValue())) {
-                        Professional professional = new Professional();
-                        professional.setUser(user);
-                        professionalRepository.save(professional);
-                    }
-                }
-			default -> throw new IllegalArgumentException("Unexpected value: " + role);
-            }
-        }
+        /* 4️⃣  Crear perfil asociado al rol */
+        ensureProfile(user, requestedRole);
 
         return user;
     }
 
+    
+    private void ensureProfile(User user, Role role) {
+        switch (role) {
+            case USER -> {
+                if (!clientRepository.existsByUserId(user.getId().longValue())) {
+                    clientRepository.save(new Client().setUser(user));
+                }
+            }
+            case PROFESSIONAL -> {
+                if (!professionalRepository.existsByUserId(user.getId().longValue())) {
+                    professionalRepository.save(new Professional().setUser(user));
+                }
+            }
+            default -> throw new IllegalArgumentException("Rol no soportado: " + role);
+        }
+    }
+
 
     public User authenticate(LoginUserDto input) {
+    	//verificar credenciales
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
+        		new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
                 )
         );
-
-        return userRepository.findByEmail(input.getEmail())
-                .orElseThrow();
+        //obtener usuario
+        User user = userRepository.findByEmail(input.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User nof found"));
+        
+        // Validar rol
+        if (input.getRole() != null && !user.getRoles().contains(input.getRole())) {
+            throw new BadCredentialsException("Role mismatch");
+        }
+        
+        return user;
     }    
 }

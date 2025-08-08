@@ -57,7 +57,8 @@ public class Client {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public Client setUser(User user) {
 		this.user = user;
+		return this;
 	}
 }

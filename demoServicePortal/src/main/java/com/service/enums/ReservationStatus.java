@@ -1,7 +1,7 @@
 package com.service.enums;
 
 
-public enum Status {
+public enum ReservationStatus {
 	PENDING,       // Pendiente
 	CONFIRMED,     // Confirmada
 	RESCHEDULED,   // Reprogramada

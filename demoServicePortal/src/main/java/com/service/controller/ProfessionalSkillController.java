@@ -25,9 +25,6 @@ public class ProfessionalSkillController {
 	@GetMapping("/get/{id}")
 	public ResponseEntity<List<IProfessionalSkillDTO>> getListByProfessional(@PathVariable Long id){
 		List<IProfessionalSkillDTO> list = repo.findByProfessionalId(id);
-		
-		System.out.println(list.get(0).getName());
-		
 		return ResponseEntity.ok(list);
 	}
 	

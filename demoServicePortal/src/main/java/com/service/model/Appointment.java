@@ -1,6 +1,6 @@
 package com.service.model;
 
-import com.service.enums.Status;
+import com.service.enums.ReservationStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,7 +36,7 @@ public class Appointment {
     private String appointmentDate;
 	
 	@Column
-	private Status status;
+	private ReservationStatus status;
 
 	public Long getAppointmentId() {
 		return appointmentId;
@@ -78,11 +78,11 @@ public class Appointment {
 		this.appointmentDate = appointmentDate;
 	}
 
-	public Status getStatus() {
+	public ReservationStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(Status status) {
+	public void setStatus(ReservationStatus status) {
 		this.status = status;
 	}
 }

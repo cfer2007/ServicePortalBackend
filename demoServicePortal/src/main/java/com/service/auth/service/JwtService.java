@@ -17,6 +17,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.service.auth.enums.Role;
+
 @Service
 public class JwtService {
     @Value("${security.jwt.secret-key}")
@@ -34,8 +36,10 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(UserDetails userDetails, Role loginRole) {
+    	Map<String, Object> claims = new HashMap<>();
+        claims.put("role", loginRole);
+        return generateToken(claims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
@@ -47,14 +51,8 @@ public class JwtService {
     }
 
     @SuppressWarnings("deprecation")
-	private String buildToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails,
-            long expiration
-    ) {
-    	extraClaims.put("role", userDetails.getAuthorities().stream()
-    	        .map(GrantedAuthority::getAuthority)
-    	        .collect(Collectors.toList()));
+	private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+    	//extraClaims.put("role", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
     	
     	return Jwts
                 .builder()
