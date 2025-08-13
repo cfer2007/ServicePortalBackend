@@ -7,7 +7,7 @@ public class RegisterUserDto {
     
     private String password;
     
-    private String fullName;
+    private String name;
     
     private Role role;
 
@@ -27,12 +27,12 @@ public class RegisterUserDto {
 		this.password = password;
 	}
 
-	public String getFullName() {
-		return fullName;
+	public String getName() {
+		return name;
 	}
 
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public Role getRole() {
@@ -46,7 +46,7 @@ public class RegisterUserDto {
 	public static class Builder {
 		 private String email;
 		 private String password;
-		 private String fullName;
+		 private String name;
 		 private Role role;
 		
 		public Builder setEmail(String email) {
@@ -59,8 +59,8 @@ public class RegisterUserDto {
 			return this;			
 		}
 		
-		public Builder setFullName(String fullName) {
-			this.fullName = fullName;
+		public Builder setName(String name) {
+			this.name = name;
 			return this;
 		}
 		
@@ -70,16 +70,16 @@ public class RegisterUserDto {
 		}
 		 
 		public RegisterUserDto build() {
-			return new RegisterUserDto(email,password,fullName, role);
+			return new RegisterUserDto(email,password,name, role);
 		}
 		 
 	}
 
-	public RegisterUserDto(String email, String password, String fullName, Role role) {
+	public RegisterUserDto(String email, String password, String name, Role role) {
 		super();
 		this.email = email;
 		this.password = password;
-		this.fullName = fullName;
+		this.name = name;
 		this.role = role;
 	}
 	

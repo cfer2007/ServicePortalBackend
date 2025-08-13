@@ -5,6 +5,9 @@ import com.service.enums.ProfileStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -46,12 +49,15 @@ public class Professional {
 	
 	@Column
 	private String modality;
-	
+		
 	@Column
+	@Enumerated(EnumType.STRING)
 	private ProfileStatus status;
 	
 	@ManyToOne
     @JoinColumn(name = "professionId", referencedColumnName = "professionId",nullable = true)
+	//@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	//@JoinColumn(name = "profession_id")
 	private Profession profession;
 	
 	@ManyToOne

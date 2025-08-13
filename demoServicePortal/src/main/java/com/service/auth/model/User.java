@@ -21,7 +21,7 @@ public class User implements UserDetails {
     private Integer id;
 
     @Column(nullable = false)
-    private String fullName;
+    private String name;
 
     @Column(unique = true, length = 100, nullable = false)
     private String email;
@@ -84,12 +84,12 @@ public class User implements UserDetails {
         return this;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getName() {
+        return name;
     }
 
-    public User setFullName(String fullName) {
-        this.fullName = fullName;
+    public User setName(String name) {
+        this.name = name;
         return this;
     }
 
@@ -106,25 +106,7 @@ public class User implements UserDetails {
         this.password = password;
         return this;
     }
-    /*
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public User setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-        return this;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public User setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-        return this;
-    }
-    */
+    
     public List<Role> getRoles() {
         return roles;
     }
@@ -133,18 +115,16 @@ public class User implements UserDetails {
         this.roles = roles;
         return this;
     }
-
+    /*
 	@Override
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", fullName='" + fullName + '\'' +
+                ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", roles='" + roles + '\'' +
-                //", createdAt=" + createdAt +
-                //", updatedAt=" + updatedAt +
                 '}';
-    }
+    }*/
 }
 

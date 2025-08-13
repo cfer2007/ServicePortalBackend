@@ -7,10 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.service.dto.ProfessionalDTO;
+import com.service.enums.ProfileStatus;
 import com.service.exception.ResourceNotFoundException;
 import com.service.model.Professional;
 import com.service.repository.ProfessionalRepository;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.*;
 
 @RestController
@@ -34,9 +36,12 @@ public class ProfessionalController {
 	*/
 	
 	@GetMapping("/get/{email}")
-	public ResponseEntity<Professional> getProfessionalByEmail(@PathVariable String email){
-		Professional p = repo.findByEmail(email);
-		return ResponseEntity.ok(p);
+	public ResponseEntity<ProfessionalDTO> getProfessionalByEmail(@PathVariable String email){
+	    Professional p = repo.findByEmail(email);
+	    if (p == null) {
+	        throw new ResourceNotFoundException("Professional with email "+email+" not found",1003);
+	    }
+	    return ResponseEntity.ok(ProfessionalDTO.from(p));
 	}
 	
 	@GetMapping("/getList/{id}")
@@ -64,8 +69,20 @@ public class ProfessionalController {
 	public ResponseEntity<Professional> editModalityProfessional(@PathVariable Long id, @RequestBody ProfessionalDTO dto) {
 		Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 		dto.updateModality(existing);
-		Professional updated = repo.save(existing);
-		return ResponseEntity.ok(updated);
+		return ResponseEntity.ok(repo.save(existing));
+	}
+	
+	@PutMapping("/edit/status/{id}")
+	@Transactional
+	public ResponseEntity<Professional> updateStatus(
+	    @PathVariable Long id,
+	    @RequestParam(name = "status") ProfileStatus status
+	) {
+	    System.out.println("updateStatus id=" + id + " status=" + status);
+	    Professional existing = repo.findById(id)
+	        .orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
+	    existing.setStatus(status);
+	    return ResponseEntity.ok(repo.save(existing));
 	}
 	
 	@DeleteMapping("/delete/{id}")

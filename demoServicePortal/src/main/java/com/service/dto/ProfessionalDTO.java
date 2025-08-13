@@ -1,31 +1,46 @@
 package com.service.dto;
 
+import com.service.enums.ProfileStatus;
 import com.service.model.Profession;
 import com.service.model.Professional;
 
 public class ProfessionalDTO {
-
- private String name;
-
- private String lastName;
- 
- private String title;
 	
- private String about;
+	private Long professionalId;
 	
- private String experienceYears;
+	private String name;
 	
- private float rate;
+	private String lastName;
+	 
+	private String phone;
+	 
+	private String title;
+		
+	private String about;
+		
+	private String experienceYears;
+		
+	private float rate;
+	 
+	private String rate_type;
+	 
+	private Long professionId;
+	 
+	private String modality;
+	 
+	private ProfileStatus status;
  
- private String rate_type;
- 
- private Long professionId;
- 
- private String modality;
-
- public String getName() {
-	return name;
-}
+	public Long getProfessionalId() {
+		return professionalId;
+	}
+	
+	public void setProfessionalId(Long professionalId) {
+		this.professionalId = professionalId;
+	}
+	
+	public String getName() {
+		return name;
+	}
 
 	public void setName(String name) {
 		this.name = name;
@@ -39,6 +54,14 @@ public class ProfessionalDTO {
 		this.lastName = lastName;
 	}
 	
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
 	public String getTitle() {
 		return title;
 	}
@@ -95,11 +118,19 @@ public class ProfessionalDTO {
 		this.modality = modality;
 	}
 
+	public ProfileStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ProfileStatus status) {
+		this.status = status;
+	}
+
 	public Professional toEntity() {
 		
 	    Professional p = new Professional();
 	    p.setName(this.name);
-	    p.setLastName(this.lastName);
+	    //p.setLastName(this.lastName);
 	    return p;
 	}
 	
@@ -108,16 +139,48 @@ public class ProfessionalDTO {
 	    profession.setProfessionId(this.professionId);		
 	    entity.setName(this.name);
 	    entity.setLastName(this.lastName);
+	    entity.setPhone(this.phone);
 	    entity.setProfession(profession);	
 	    entity.setTitle(this.title);
 	    entity.setAbout(this.about);
 	    entity.setExperienceYears(this.experienceYears);
 	    entity.setRate_type(this.rate_type);
 	    entity.setRate(this.rate);
+	    entity.setStatus(this.status);
 	}
 	
 	public void updateModality(Professional entity) {
 		entity.setModality(this.modality);
+	}
+	
+	public static ProfessionalDTO from(Professional p) {
+	    ProfessionalDTO dto = new ProfessionalDTO();
+
+	    // Identificadores y datos base
+	    dto.setProfessionalId(p.getProfessionalId());
+	    dto.setName(p.getName());
+	    dto.setLastName(p.getLastName());
+	    dto.setPhone(p.getPhone());
+	    dto.setTitle(p.getTitle());
+	    dto.setAbout(p.getAbout());
+	    dto.setExperienceYears(p.getExperienceYears());
+	    dto.setRate_type(p.getRate_type());   // ⚠️ tu entidad usa rate_type con guión bajo
+	    dto.setRate(p.getRate());
+	    dto.setModality(p.getModality());
+	    dto.setStatus(p.getStatus());         // en tu entidad el getter es getStatus()
+
+	    // Profesión (solo IDs/nombre para evitar LAZY)
+	    if (p.getProfession() != null) {
+	        dto.setProfessionId(p.getProfession().getProfessionId());
+	        //dto.setProfessionName(p.getProfession().getName()); // si no lo necesitas, quítalo
+	    }
+
+	    // Usuario (si quieres exponer email)
+	    //if (p.getUser() != null) {
+	    //    dto.setEmail(p.getUser().getEmail());
+	   // }
+
+	    return dto;
 	}
 }
 

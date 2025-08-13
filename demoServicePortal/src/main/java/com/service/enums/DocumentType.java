@@ -1,0 +1,14 @@
+package com.service.enums;
+
+public enum DocumentType {
+	DPI_FRONT,
+	DPI_BACK,
+	SELFIE,
+	PENAL_RECORD,
+	POLICE_RECORD,
+	LICENSE,
+	CIRCULATION_CARD,
+	INSURANCE,
+	VEHICLE_PHOTO,
+	SIGNED_CONTRACT
+}
