@@ -36,12 +36,12 @@ public class ProfessionalController {
 	*/
 	
 	@GetMapping("/get/{email}")
-	public ResponseEntity<ProfessionalDTO> getProfessionalByEmail(@PathVariable String email){
+	public ResponseEntity<Professional> getProfessionalByEmail(@PathVariable String email){
 	    Professional p = repo.findByEmail(email);
 	    if (p == null) {
 	        throw new ResourceNotFoundException("Professional with email "+email+" not found",1003);
 	    }
-	    return ResponseEntity.ok(ProfessionalDTO.from(p));
+	    return ResponseEntity.ok(p);
 	}
 	
 	@GetMapping("/getList/{id}")
@@ -74,13 +74,9 @@ public class ProfessionalController {
 	
 	@PutMapping("/edit/status/{id}")
 	@Transactional
-	public ResponseEntity<Professional> updateStatus(
-	    @PathVariable Long id,
-	    @RequestParam(name = "status") ProfileStatus status
-	) {
+	public ResponseEntity<Professional> updateStatus(@PathVariable Long id, @RequestParam(name = "status") ProfileStatus status) {
 	    System.out.println("updateStatus id=" + id + " status=" + status);
-	    Professional existing = repo.findById(id)
-	        .orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
+	    Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 	    existing.setStatus(status);
 	    return ResponseEntity.ok(repo.save(existing));
 	}

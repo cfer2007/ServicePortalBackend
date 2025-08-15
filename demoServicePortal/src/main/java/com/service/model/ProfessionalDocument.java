@@ -4,15 +4,12 @@ import com.service.enums.DocumentType;
 
 import java.time.Instant;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.service.enums.DocumentStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,7 +17,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-//@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Entity
 @Table(name = "professional_document")
 public class ProfessionalDocument {
@@ -31,9 +27,6 @@ public class ProfessionalDocument {
 	
 	@ManyToOne
     @JoinColumn(name = "professionalId", referencedColumnName = "professionalId",nullable = true)
-	//@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "professional_id", nullable = false)
-    //@JsonIgnore   // <- evita que Jackson intente serializar el proxy LAZY
 	private Professional professional;
 	
 	@Column

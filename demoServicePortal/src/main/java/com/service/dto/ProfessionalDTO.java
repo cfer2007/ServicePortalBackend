@@ -29,6 +29,8 @@ public class ProfessionalDTO {
 	private String modality;
 	 
 	private ProfileStatus status;
+	
+	private Profession profession;
  
 	public Long getProfessionalId() {
 		return professionalId;
@@ -126,6 +128,14 @@ public class ProfessionalDTO {
 		this.status = status;
 	}
 
+	public Profession getProfession() {
+		return profession;
+	}
+
+	public void setProfession(Profession profession) {
+		this.profession = profession;
+	}
+
 	public Professional toEntity() {
 		
 	    Professional p = new Professional();
@@ -147,6 +157,7 @@ public class ProfessionalDTO {
 	    entity.setRate_type(this.rate_type);
 	    entity.setRate(this.rate);
 	    entity.setStatus(this.status);
+	    entity.setModality(this.modality);
 	}
 	
 	public void updateModality(Professional entity) {
@@ -170,16 +181,10 @@ public class ProfessionalDTO {
 	    dto.setStatus(p.getStatus());         // en tu entidad el getter es getStatus()
 
 	    // Profesión (solo IDs/nombre para evitar LAZY)
-	    if (p.getProfession() != null) {
+	    if (p.getProfession() != null) {	    	
 	        dto.setProfessionId(p.getProfession().getProfessionId());
 	        //dto.setProfessionName(p.getProfession().getName()); // si no lo necesitas, quítalo
 	    }
-
-	    // Usuario (si quieres exponer email)
-	    //if (p.getUser() != null) {
-	    //    dto.setEmail(p.getUser().getEmail());
-	   // }
-
 	    return dto;
 	}
 }
