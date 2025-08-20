@@ -9,6 +9,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -89,4 +90,22 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+    
+    public String generateToken(String subject, Set<Role> allRoles, Role activeRole) {
+    	  Map<String, Object> claims = new java.util.HashMap<>();
+    	  claims.put("roles", allRoles.stream().map(Role::name).toArray(String[]::new));
+    	  claims.put("role", activeRole.name());
+    	  return buildToken(claims, subject, jwtExpiration);
+    	}
+
+    	private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
+    	  return Jwts.builder()
+    	      .setClaims(extraClaims)
+    	      .setSubject(subject)
+    	      .setIssuedAt(new Date())
+    	      .setExpiration(new Date(System.currentTimeMillis() + expiration))
+    	      .signWith(SignatureAlgorithm.HS256, getSignInKey())
+    	      .compact();
+    	}
+
 }

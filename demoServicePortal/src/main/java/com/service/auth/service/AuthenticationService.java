@@ -115,5 +115,51 @@ public class AuthenticationService {
         }
         
         return user;
-    }    
+    }   
+    
+    public AuthOutcome authenticateAndSelectRole(LoginUserDto input, String loginPathOrHint) {
+        // 1) Autentica credenciales
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
+        );
+
+        // 2) Carga usuario y roles reales
+        User user = userRepository.findByEmail(input.getEmail())
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Set<Role> userRoles = new java.util.HashSet<>(user.getRoles()); // Set<Role>
+
+        // 3) Determina área a partir de la ruta o del hint (no confiable)
+        String src = (loginPathOrHint == null ? "" : loginPathOrHint).toLowerCase();
+        Role hint = input.getRole(); // opcional; úsalo solo como pista
+        boolean professionalArea =
+            src.contains("/professional/login") || Role.PROFESSIONAL.equals(hint);
+
+        // 4) Roles permitidos por área
+        java.util.Set<Role> allowed = professionalArea
+            ? java.util.Set.of(Role.ADMIN, Role.PROFESSIONAL)
+            : java.util.Set.of(Role.USER);
+
+        // 5) Elegir rol ACTIVO con prioridad ADMIN > PROFESSIONAL > USER
+        Role active = pickActiveRole(userRoles, allowed);
+        if (active == null) throw new BadCredentialsException("Role mismatch for this area");
+
+        // 6) Reglas extra (opcional): admin corporativo
+        if (active == Role.ADMIN && !isCorporateEmail(user.getEmail())) {
+          throw new BadCredentialsException("Invalid admin email");
+        }
+
+        return new AuthOutcome(user, userRoles, active);
+      }
+    
+    private Role pickActiveRole(Set<Role> userRoles, Set<Role> allowed) {
+        if (allowed.contains(Role.ADMIN) && userRoles.contains(Role.ADMIN)) return Role.ADMIN;
+        if (allowed.contains(Role.PROFESSIONAL) && userRoles.contains(Role.PROFESSIONAL)) return Role.PROFESSIONAL;
+        if (allowed.contains(Role.USER) && userRoles.contains(Role.USER)) return Role.USER;
+        return null;
+      }
+
+      private boolean isCorporateEmail(String email) {
+        return email != null && email.toLowerCase().endsWith("@miempresa.com"); // ajusta dominio
+      }
 }
