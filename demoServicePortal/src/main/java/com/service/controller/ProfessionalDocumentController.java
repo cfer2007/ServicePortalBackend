@@ -1,76 +1,214 @@
-// src/main/java/com/service/controller/ProfessionalDocumentController.java
 package com.service.controller;
 
-import com.service.dto.ProfessionalDocumentDTO;
 import com.service.enums.DocumentStatus;
 import com.service.enums.DocumentType;
-import com.service.model.*;
+import com.service.enums.ProfileStatus;
+import com.service.model.Professional;
+import com.service.model.ProfessionalDocument;
 import com.service.repository.ProfessionalDocumentRepository;
 import com.service.repository.ProfessionalRepository;
-import com.service.service.FileStorageService;
-import jakarta.transaction.Transactional;
+import com.service.service.ProfessionalValidationService;
 
-import java.time.Instant;
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-//imports típicos omitidos por brevedad
+import java.nio.file.*;
+import java.time.Instant;
+import java.util.*;
+
 @RestController
 @RequestMapping("/professional_document")
-public class ProfessionalDocumentController {
+@CrossOrigin(origins = {"http://localhost:3000"})
+class LegacyProfessionalDocumentController {
 
- private final ProfessionalDocumentRepository docRepo;
- private final ProfessionalRepository professionalRepo;
- private final FileStorageService storage;
+    private final ProfessionalDocumentRepository documentRepo;
+    private final ProfessionalRepository professionalRepo;
+    private final ProfessionalValidationService validationService;
 
- public ProfessionalDocumentController(
-     ProfessionalDocumentRepository docRepo,
-     ProfessionalRepository professionalRepo,
-     FileStorageService storage
- ) {
-     this.docRepo = docRepo;
-     this.professionalRepo = professionalRepo;
-     this.storage = storage;
- }
+    LegacyProfessionalDocumentController(ProfessionalDocumentRepository documentRepo,
+                                         ProfessionalRepository professionalRepo,
+                                         ProfessionalValidationService validationService) {
+        this.documentRepo = documentRepo;
+        this.professionalRepo = professionalRepo;
+        this.validationService = validationService;
+    }
 
- @PostMapping("/upload/{professionalId}")
- @Transactional
- public ResponseEntity<ProfessionalDocumentDTO> upload(
-         @PathVariable Long professionalId,
-         @RequestParam("file") MultipartFile file,
-         @RequestParam("type") DocumentType type
- ) throws Exception {
+    @PostMapping(value = "/upload/{professionalId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
+    public ResponseEntity<?> legacyUpload(
+        @PathVariable Long professionalId,
+        @RequestParam("file") MultipartFile file,
+        @RequestParam(value = "type", required = false) DocumentType legacyType,
+        @RequestParam(value = "docType", required = false) DocumentType docType // por si ya mandan el nuevo
+    ) {
+        try {
+            DocumentType effectiveType = (docType != null) ? docType : legacyType;
+            if (effectiveType == null) {
+                return ResponseEntity.badRequest().body(Map.of("message", "type/docType es requerido"));
+            }
+            if (file == null || file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "file vacío o ausente"));
+            }
 
-     String url = storage.store(professionalId, file, "identity");
+            Professional professional = professionalRepo.findById(professionalId)
+                .orElseThrow(() -> new NoSuchElementException("Professional " + professionalId + " not found"));
 
-     // referencia administrada (no crear new Professional)
-     Professional profRef = professionalRepo.getReferenceById(professionalId);
+            String originalName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String ext = "";
+            int dot = originalName.lastIndexOf('.');
+            if (dot >= 0) ext = originalName.substring(dot);
 
-     ProfessionalDocument doc = docRepo
-         .findByProfessional_ProfessionalIdAndType(professionalId, type)
-         .orElseGet(ProfessionalDocument::new);
+            String storedName = UUID.randomUUID() + (ext.isBlank() ? "" : ext);
+            Path uploadDir = Path.of("uploads", "professionals", String.valueOf(professionalId));
 
-     doc.setProfessional(profRef);
-     doc.setType(type);
-     doc.setUrl(url);
-     doc.setStatus(DocumentStatus.PENDING);
-     doc.setDate(Instant.now());
+            Files.createDirectories(uploadDir);
+            Path target = uploadDir.resolve(storedName);
+            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
 
-     ProfessionalDocument saved = docRepo.save(doc);
-     return ResponseEntity.ok(ProfessionalDocumentDTO.from(saved));
- }
+            String url = "/uploads/professionals/" + professionalId + "/" + storedName;
 
- @GetMapping("/list/{professionalId}")
- public ResponseEntity<List<ProfessionalDocumentDTO>> list(@PathVariable Long professionalId) {
-     List<ProfessionalDocumentDTO> out = docRepo
-         .findByProfessional_ProfessionalId(professionalId)
-         .stream()
-         .map(ProfessionalDocumentDTO::from)
-         .toList();
+            ProfessionalDocument doc = new ProfessionalDocument();
+            doc.setProfessional(professional);
+            doc.setType(effectiveType);
+            doc.setStatus(DocumentStatus.PENDING);
+            doc.setReadable(true);
+            doc.setFileName(originalName);
+            doc.setContentType(file.getContentType());
+            doc.setSizeBytes(file.getSize());
+            doc.setUrl(url);
 
-     return ResponseEntity.ok(out);
- }
+            ProfessionalDocument saved = documentRepo.save(doc);
+
+            try {
+                var auto = validationService.run(professionalId);
+                if (auto.documentsComplete && auto.filesReadable) {
+                    professional.setStatus(ProfileStatus.PENDING_REVIEW);
+                    professionalRepo.save(professional);
+                }
+            } catch (Exception ignored) {}
+
+            return ResponseEntity.ok(saved);
+
+        } catch (NoSuchElementException notFound) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", notFound.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "Error al subir documento (legacy)"));
+        }
+    }
+    
+    @GetMapping("/get/{professionalId}")
+    public ResponseEntity<?> getByProfessional(@PathVariable Long professionalId) {
+        try {
+            List<ProfessionalDocument> docs = documentRepo.findByProfessional_ProfessionalId(professionalId);
+            return ResponseEntity.ok(docs);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "Error listando documentos"));
+        }
+    }
+    
+    @PutMapping(value = "/update/{professionalId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
+    public ResponseEntity<?> update(
+        @PathVariable Long professionalId,
+        @RequestParam("file") MultipartFile file,
+        @RequestParam(value = "docType", required = false) DocumentType docType,
+        @RequestParam(value = "type", required = false) DocumentType legacyType // compatibilidad
+    ) {
+        try {
+            DocumentType effectiveType = (docType != null) ? docType : legacyType;
+            if (effectiveType == null) {
+                return ResponseEntity.badRequest().body(Map.of("message", "type/docType es requerido"));
+            }
+            if (file == null || file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "file vacío o ausente"));
+            }
+
+            Professional professional = professionalRepo.findById(professionalId)
+                .orElseThrow(() -> new NoSuchElementException("Professional " + professionalId + " not found"));
+
+            // Buscar existente por (professionalId + type) — usando stream para no requerir método extra en repo
+            Optional<ProfessionalDocument> existingOpt = documentRepo.findByProfessional_ProfessionalId(professionalId)
+                .stream()
+                .filter(d -> effectiveType.equals(d.getType()))
+                .max(Comparator.comparing(ProfessionalDocument::getDate, Comparator.nullsFirst(Comparator.naturalOrder())));
+
+            // Guardar archivo nuevo
+            String originalName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String ext = "";
+            int dot = originalName.lastIndexOf('.');
+            if (dot >= 0) ext = originalName.substring(dot);
+            String storedName = UUID.randomUUID() + (ext.isBlank() ? "" : ext);
+
+            Path uploadDir = Path.of("uploads", "professionals", String.valueOf(professionalId));
+            Files.createDirectories(uploadDir);
+            Path target = uploadDir.resolve(storedName);
+            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+            String newUrl = "/uploads/professionals/" + professionalId + "/" + storedName;
+
+            // Borrar archivo previo (si existía)
+            existingOpt.ifPresent(prev -> {
+                try {
+                    String oldUrl = prev.getUrl();
+                    if (oldUrl != null && oldUrl.startsWith("/uploads/")) {
+                        Path oldPath = Path.of(oldUrl.substring(1)).normalize();
+                        Path root = Path.of("uploads").toAbsolutePath().normalize();
+                        if (oldPath.toAbsolutePath().startsWith(root)) {
+                            Files.deleteIfExists(oldPath);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
+
+            // Upsert del registro
+            ProfessionalDocument doc = existingOpt.orElseGet(() -> {
+                ProfessionalDocument d = new ProfessionalDocument();
+                d.setProfessional(professional);
+                d.setType(effectiveType);
+                d.setReadable(true);
+                return d;
+            });
+
+            doc.setUrl(newUrl);
+            doc.setFileName(originalName);
+            doc.setContentType(file.getContentType());
+            doc.setSizeBytes(file.getSize());
+            doc.setDate(Instant.now());
+            doc.setStatus(DocumentStatus.PENDING);   // vuelve a pendiente para nueva revisión
+            doc.setStatusReason(null);               // limpia motivo (si el campo existe)
+
+            ProfessionalDocument saved = documentRepo.save(doc);
+
+            // Limpiar duplicados del mismo tipo (y sus archivos)
+            documentRepo.findByProfessional_ProfessionalId(professionalId).stream()
+                .filter(d -> effectiveType.equals(d.getType())
+                          && !Objects.equals(d.getProfessionalDocumentId(), saved.getProfessionalDocumentId()))
+                .forEach(dup -> {
+                    try {
+                        String url = dup.getUrl();
+                        if (url != null && url.startsWith("/uploads/")) {
+                            Path p = Path.of(url.substring(1)).normalize();
+                            Path root = Path.of("uploads").toAbsolutePath().normalize();
+                            if (p.toAbsolutePath().startsWith(root)) Files.deleteIfExists(p);
+                        }
+                    } catch (Exception ignored) {}
+                    documentRepo.delete(dup);
+                });
+
+            // Importante: aquí NO cambiamos el ProfileStatus; el reenvío a revisión lo hará el usuario.
+            return ResponseEntity.ok(saved);
+
+        } catch (NoSuchElementException notFound) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", notFound.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "Error actualizando documento", "error", ex.getClass().getSimpleName()));
+        }
+    }
+
 }
