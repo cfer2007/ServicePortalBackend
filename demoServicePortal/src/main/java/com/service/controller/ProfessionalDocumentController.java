@@ -111,10 +111,10 @@ class LegacyProfessionalDocumentController {
         }
     }
     
-    @PutMapping(value = "/update/{professionalId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/update/{documentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
     public ResponseEntity<?> update(
-        @PathVariable Long professionalId,
+        @PathVariable Long documentId,
         @RequestParam("file") MultipartFile file,
         @RequestParam(value = "docType", required = false) DocumentType docType,
         @RequestParam(value = "type", required = false) DocumentType legacyType // compatibilidad
@@ -128,14 +128,12 @@ class LegacyProfessionalDocumentController {
                 return ResponseEntity.badRequest().body(Map.of("message", "file vacío o ausente"));
             }
 
-            Professional professional = professionalRepo.findById(professionalId)
-                .orElseThrow(() -> new NoSuchElementException("Professional " + professionalId + " not found"));
+            // Buscar documento existente por su ID
+            ProfessionalDocument doc = documentRepo.findById(documentId)
+                .orElseThrow(() -> new NoSuchElementException("Document " + documentId + " not found"));
 
-            // Buscar existente por (professionalId + type) — usando stream para no requerir método extra en repo
-            Optional<ProfessionalDocument> existingOpt = documentRepo.findByProfessional_ProfessionalId(professionalId)
-                .stream()
-                .filter(d -> effectiveType.equals(d.getType()))
-                .max(Comparator.comparing(ProfessionalDocument::getDate, Comparator.nullsFirst(Comparator.naturalOrder())));
+            Professional professional = doc.getProfessional();
+            Long professionalId = professional.getProfessionalId();
 
             // Guardar archivo nuevo
             String originalName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
@@ -151,56 +149,32 @@ class LegacyProfessionalDocumentController {
 
             String newUrl = "/uploads/professionals/" + professionalId + "/" + storedName;
 
-            // Borrar archivo previo (si existía)
-            existingOpt.ifPresent(prev -> {
-                try {
-                    String oldUrl = prev.getUrl();
-                    if (oldUrl != null && oldUrl.startsWith("/uploads/")) {
-                        Path oldPath = Path.of(oldUrl.substring(1)).normalize();
-                        Path root = Path.of("uploads").toAbsolutePath().normalize();
-                        if (oldPath.toAbsolutePath().startsWith(root)) {
-                            Files.deleteIfExists(oldPath);
-                        }
+            // Borrar archivo previo
+            try {
+                String oldUrl = doc.getUrl();
+                if (oldUrl != null && oldUrl.startsWith("/uploads/")) {
+                    Path oldPath = Path.of(oldUrl.substring(1)).normalize();
+                    Path root = Path.of("uploads").toAbsolutePath().normalize();
+                    if (oldPath.toAbsolutePath().startsWith(root)) {
+                        Files.deleteIfExists(oldPath);
                     }
-                } catch (Exception ignored) {}
-            });
+                }
+            } catch (Exception ignored) {}
 
-            // Upsert del registro
-            ProfessionalDocument doc = existingOpt.orElseGet(() -> {
-                ProfessionalDocument d = new ProfessionalDocument();
-                d.setProfessional(professional);
-                d.setType(effectiveType);
-                d.setReadable(true);
-                return d;
-            });
-
+            // Actualizar el registro existente
+            doc.setType(effectiveType); // por si acaso
             doc.setUrl(newUrl);
             doc.setFileName(originalName);
             doc.setContentType(file.getContentType());
             doc.setSizeBytes(file.getSize());
             doc.setDate(Instant.now());
-            doc.setStatus(DocumentStatus.PENDING);   // vuelve a pendiente para nueva revisión
-            doc.setStatusReason(null);               // limpia motivo (si el campo existe)
+            doc.setStatus(DocumentStatus.PENDING);   // vuelve a pendiente para revisión
+            doc.setStatusReason(null);
 
             ProfessionalDocument saved = documentRepo.save(doc);
 
-            // Limpiar duplicados del mismo tipo (y sus archivos)
-            documentRepo.findByProfessional_ProfessionalId(professionalId).stream()
-                .filter(d -> effectiveType.equals(d.getType())
-                          && !Objects.equals(d.getProfessionalDocumentId(), saved.getProfessionalDocumentId()))
-                .forEach(dup -> {
-                    try {
-                        String url = dup.getUrl();
-                        if (url != null && url.startsWith("/uploads/")) {
-                            Path p = Path.of(url.substring(1)).normalize();
-                            Path root = Path.of("uploads").toAbsolutePath().normalize();
-                            if (p.toAbsolutePath().startsWith(root)) Files.deleteIfExists(p);
-                        }
-                    } catch (Exception ignored) {}
-                    documentRepo.delete(dup);
-                });
+            // Importante: aquí NO tocamos el ProfileStatus
 
-            // Importante: aquí NO cambiamos el ProfileStatus; el reenvío a revisión lo hará el usuario.
             return ResponseEntity.ok(saved);
 
         } catch (NoSuchElementException notFound) {
@@ -210,5 +184,6 @@ class LegacyProfessionalDocumentController {
                 .body(Map.of("message", "Error actualizando documento", "error", ex.getClass().getSimpleName()));
         }
     }
+
 
 }

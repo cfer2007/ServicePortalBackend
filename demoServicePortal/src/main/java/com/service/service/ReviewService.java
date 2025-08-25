@@ -136,94 +136,93 @@ public class ReviewService {
 
     final String decision = req.decision.trim().toUpperCase();
 
-    // 1) Cargar profesional y todos sus documentos (evita depender de 'current')
+    // 1) Cargar profesional y sus documentos
     Professional p = professionalRepo.findById(professionalId)
         .orElseThrow(() -> new IllegalArgumentException("Professional " + professionalId + " not found"));
 
     List<com.service.model.ProfessionalDocument> docs =
         documentRepo.findByProfessional_ProfessionalId(professionalId);
 
-    // 2) Aplicar la decisión
-    if ("APPROVED".equals(decision)) {
-      // Aprueba PENDING / REQUIRES_CHANGES y limpia motivo
-      for (com.service.model.ProfessionalDocument d : docs) {
-        com.service.enums.DocumentStatus st = d.getStatus();
-        if (st == com.service.enums.DocumentStatus.PENDING ||
-            st == com.service.enums.DocumentStatus.REQUIRES_CHANGES) {
-          d.setStatus(com.service.enums.DocumentStatus.APPROVED);
-          d.setStatusReason(null);
+    switch (decision) {
+      case "APPROVED" -> {
+        // Aprueba PENDING / REQUIRES_CHANGES y limpia motivo
+        for (var d : docs) {
+          var st = d.getStatus();
+          if (st == com.service.enums.DocumentStatus.PENDING ||
+              st == com.service.enums.DocumentStatus.REQUIRES_CHANGES) {
+            d.setStatus(com.service.enums.DocumentStatus.APPROVED);
+            d.setStatusReason(null);
+          }
         }
+        documentRepo.saveAll(docs);
+
+        p.setStatus(com.service.enums.ProfileStatus.APPROVED); // o ACTIVE si así lo manejas
+        professionalRepo.save(p);
       }
-      documentRepo.saveAll(docs);
 
-      p.setStatus(com.service.enums.ProfileStatus.APPROVED); // o ACTIVE si así lo manejas
-      // Si tienes un campo reviewerNotes en Professional, puedes limpiarlo aquí:
-      // p.setReviewerNotes(null);
-      professionalRepo.save(p);
-    }
-    else if ("REJECTED".equals(decision)) {
-      p.setStatus(com.service.enums.ProfileStatus.REJECTED);
-      // Si tienes reviewerNotes y quieres mostrar el mensaje general:
-      // p.setReviewerNotes(req.notes);
-      professionalRepo.save(p);
-    }
-    else if ("REQUIRES_CHANGES".equals(decision)) {
-      // Marcar como REQUIRES_CHANGES únicamente los tipos solicitados
-      if (req.requestedDocs != null) {
-        for (com.service.enums.DocumentType type : req.requestedDocs) {
-          if (type == null) continue;
+      case "REJECTED" -> {
+        p.setStatus(com.service.enums.ProfileStatus.REJECTED);
+        professionalRepo.save(p);
+      }
 
-          // Buscar el doc más reciente por tipo (por campo 'date')
-          com.service.model.ProfessionalDocument latest = null;
-          for (com.service.model.ProfessionalDocument d : docs) {
-            if (type.equals(d.getType())) {
-              if (latest == null ||
-                  (d.getDate() != null && (latest.getDate() == null || d.getDate().isAfter(latest.getDate())))) {
-                latest = d;
-              }
+      case "REQUIRES_CHANGES" -> {
+        // ✅ NUEVO: por documento (items)
+        if (req.items == null || req.items.isEmpty()) {
+          throw new IllegalArgumentException("Debes especificar al menos un documento con cambios.");
+        }
+
+        // Mapear por id para búsqueda rápida.
+        // IMPORTANTE: ajusta el getter del ID si en tu entidad no es getProfessionalDocumentId().
+        java.util.Map<Long, com.service.model.ProfessionalDocument> byId = new java.util.HashMap<>();
+        for (var d : docs) {
+          byId.put(d.getProfessionalDocumentId(), d); // <-- usa el nombre real de tu @Id
+          // Si tu id es "getId()", cambia a: byId.put(d.getId(), d);
+        }
+
+        for (var item : req.items) {
+          if (item.documentId == null) {
+            throw new IllegalArgumentException("Falta documentId en un item de cambios.");
+          }
+          String comment = nullIfBlank(item.comment);
+          if (comment == null) {
+            throw new IllegalArgumentException("El documento " + item.documentId + " requiere comentario.");
+          }
+
+          var doc = byId.get(item.documentId);
+          if (doc == null) {
+            // Fallback seguro: buscar por ID y validar pertenencia
+            var found = documentRepo.findById(item.documentId)
+                .orElseThrow(() -> new IllegalArgumentException("Documento " + item.documentId + " no existe"));
+            if (!found.getProfessional().getProfessionalId().equals(professionalId)) {
+              throw new IllegalArgumentException("Documento " + item.documentId + " no pertenece al profesional " + professionalId);
             }
+            doc = found;
           }
 
-          if (latest != null) {
-            latest.setStatus(com.service.enums.DocumentStatus.REQUIRES_CHANGES);
-            // Guardamos el motivo general en statusReason (no hay motivo por-doc en tu DTO)
-            latest.setStatusReason(nullIfBlank(req.notes));
-            documentRepo.save(latest);
-          } else {
-            // Si no existe doc de ese tipo aún, crea un registro mínimo observado
-            com.service.model.ProfessionalDocument d = new com.service.model.ProfessionalDocument();
-            d.setProfessional(p);
-            d.setType(type);
-            d.setStatus(com.service.enums.DocumentStatus.REQUIRES_CHANGES);
-            d.setStatusReason(nullIfBlank(req.notes));
-            d.setDate(java.time.Instant.now());
-            // d.setRequired(true); d.setReadable(false); // opcional
-            documentRepo.save(d);
-            docs.add(d); // mantenerlo en memoria por si se repite el tipo
-          }
+          doc.setStatus(com.service.enums.DocumentStatus.REQUIRES_CHANGES);
+          doc.setStatusReason(comment);
+          // Si quieres, también puedes marcar readable=false cuando se piden cambios por legibilidad
+          // doc.setReadable(Boolean.TRUE.equals(doc.isReadable()) ? doc.isReadable() : false);
+          documentRepo.save(doc);
         }
+
+        p.setStatus(com.service.enums.ProfileStatus.REQUIRES_CHANGES);
+        professionalRepo.save(p);
       }
 
-      p.setStatus(com.service.enums.ProfileStatus.REQUIRES_CHANGES);
-      // Si tienes reviewerNotes en Professional, puedes persistir el mensaje general:
-      // p.setReviewerNotes(req.notes);
-      professionalRepo.save(p);
-    }
-    else {
-      throw new IllegalArgumentException("Decisión inválida: " + req.decision);
+      default -> throw new IllegalArgumentException("Decisión inválida: " + req.decision);
     }
 
-    // 3) Log de auditoría (conserva tu implementación)
-    com.service.model.ProfessionalReviewLog log = new com.service.model.ProfessionalReviewLog();
+    // 3) Log de auditoría
+    var log = new ProfessionalReviewLog();
     log.setProfessional(p);
     log.setReviewerEmail(reviewerEmail);
-    // mapea el estado final del perfil según decisión
-    com.service.enums.ProfileStatus logged =
+    var logged =
         "APPROVED".equals(decision) ? com.service.enums.ProfileStatus.APPROVED :
         "REJECTED".equals(decision) ? com.service.enums.ProfileStatus.REJECTED :
                                       com.service.enums.ProfileStatus.REQUIRES_CHANGES;
     log.setNewStatus(logged);
-    log.setNotes(req.notes);
+    log.setNotes(req.notes); // mensaje general (opcional)
     log.setDecidedAt(java.time.LocalDateTime.now());
     logRepo.save(log);
   }
@@ -234,5 +233,6 @@ public class ReviewService {
     String t = s.trim();
     return t.isEmpty() ? null : t;
   }
+
 
 }
