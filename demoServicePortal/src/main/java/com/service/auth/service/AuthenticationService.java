@@ -162,4 +162,44 @@ public class AuthenticationService {
       private boolean isCorporateEmail(String email) {
         return email != null && email.toLowerCase().endsWith("@miempresa.com"); // ajusta dominio
       }
+      
+   // --- Helpers de roles (wrappers simples) ---
+
+      /** Convierte los roles del usuario a Set<Role> sin duplicados, seguro para listas vacías. */
+      private Set<Role> toRoleSet(User u) {
+        if (u == null || u.getRoles() == null || u.getRoles().isEmpty()) {
+          return EnumSet.noneOf(Role.class);
+        }
+        // EnumSet requiere no vacío; usa HashSet primero y crea EnumSet si hay elementos
+        java.util.Set<Role> tmp = new java.util.HashSet<>(u.getRoles());
+        return tmp.isEmpty() ? EnumSet.noneOf(Role.class) : EnumSet.copyOf(tmp);
+      }
+
+      /** Carga roles por email como Set<Role>. */
+      public Set<Role> getRolesByEmail(String email) {
+        User u = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        return toRoleSet(u);
+      }
+
+      /** Rol por defecto con prioridad ADMIN > PROFESSIONAL > USER. */
+      public Role pickDefaultRole(Set<Role> roles) {
+        if (roles == null || roles.isEmpty()) return Role.USER; // o lanza excepción si lo prefieres
+        if (roles.contains(Role.ADMIN)) return Role.ADMIN;
+        if (roles.contains(Role.PROFESSIONAL)) return Role.PROFESSIONAL;
+        if (roles.contains(Role.USER)) return Role.USER;
+        // Fallback defensivo
+        return roles.iterator().next();
+      }
+
+      /** Variante que intenta respetar el path/hint (e.g. "/professional/login"), con fallback a prioridad fija. */
+      public Role pickDefaultRole(Set<Role> roles, String loginPathOrHint) {
+        if (roles == null || roles.isEmpty()) return Role.USER;
+        String p = loginPathOrHint == null ? "" : loginPathOrHint.toLowerCase();
+        if (p.contains("/admin") && roles.contains(Role.ADMIN)) return Role.ADMIN;
+        if (p.contains("/professional") && roles.contains(Role.PROFESSIONAL)) return Role.PROFESSIONAL;
+        if ((p.equals("/") || p.contains("/login")) && roles.contains(Role.USER)) return Role.USER;
+        return pickDefaultRole(roles);
+      }
+
 }

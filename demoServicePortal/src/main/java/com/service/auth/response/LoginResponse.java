@@ -4,6 +4,8 @@ public class LoginResponse {
     private String token;
 
     private long expiresIn;
+    
+    private String refreshToken;
 
     public String getToken() {
         return token;
@@ -23,7 +25,16 @@ public class LoginResponse {
         return this;
     }
 
-    @Override
+    public String getRefreshToken() {
+		return refreshToken;
+	}
+
+	public LoginResponse setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+		return this;
+	}
+
+	@Override
     public String toString() {
         return "LoginResponse{" +
                 "token='" + token + '\'' +

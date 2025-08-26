@@ -40,7 +40,7 @@ public class SecurityConfiguration {
         .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/login", "/auth/signup", "/auth/refresh").permitAll()
                 //.requestMatchers("/admin/**").hasAuthority("ADMIN") 
                 .anyRequest()
                 .authenticated()
@@ -56,16 +56,14 @@ public class SecurityConfiguration {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+    	CorsConfiguration configuration = new CorsConfiguration();
+    	  configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+    	  configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
+    	  configuration.setAllowedHeaders(List.of("*")); // en dev, más simple; si prefieres: Authorization, Content-Type, X-Login-Path
+    	  // configuration.setAllowCredentials(true); // solo si usas cookies; con body no es necesario
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("GET","POST", "PUT","DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type","X-Login-Path"));        
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**",configuration);
-
-        return source;
+    	  UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    	  source.registerCorsConfiguration("/**", configuration);
+    	  return source;
     }
 }

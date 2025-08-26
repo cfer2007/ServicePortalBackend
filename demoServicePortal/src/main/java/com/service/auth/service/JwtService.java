@@ -25,6 +25,9 @@ public class JwtService {
 
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
+
+    @Value("${security.jwt.refresh-expiration-time}") // nueva: REFRESH
+    private long refreshExpiration;
     
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -68,7 +71,7 @@ public class JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
@@ -107,5 +110,24 @@ public class JwtService {
     	      .signWith(SignatureAlgorithm.HS256, getSignInKey())
     	      .compact();
     	}
+    public String generateAccessToken(String subject, Set<Role> allRoles, Role activeRole) {
+    	Map<String, Object> claims = new HashMap<>();
+        if (allRoles != null) claims.put("roles", allRoles.stream().map(Role::name).toArray(String[]::new));
+        if (activeRole != null) claims.put("role", activeRole.name());
+        claims.put("typ", "access");
+        return buildToken(claims, subject, jwtExpiration);
+    }
+
+    public String generateRefreshToken(String subject) {
+    	Map<String, Object> claims = new HashMap<>();
+        claims.put("typ", "refresh");
+        return buildToken(claims, subject, refreshExpiration);
+    }
+
+    public boolean isRefreshToken(String token) {
+        //String typ = extractClaim(token, c -> (String) c.get("typ"));
+        //return "refresh".equalsIgnoreCase(typ);
+    	return "refresh".equalsIgnoreCase(extractClaim(token, c -> (String)c.get("typ")));
+    }
 
 }
