@@ -38,57 +38,39 @@ public class AuthenticationController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginUserDto dto,HttpServletRequest request) {
-      String path = request.getHeader("X-Login-Path");   // ej. /professional/login ó /login
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginUserDto dto, HttpServletRequest request) {
+      String path = request.getHeader("X-Login-Path");
       AuthOutcome out = authenticationService.authenticateAndSelectRole(dto, path);
 
-      String token = jwtService.generateToken(out.user().getEmail(), out.roles(),        // todos los roles asignados
-          out.activeRole()    // rol activo único
-      );
-      
+      String access  = jwtService.generateAccessToken(out.user().getEmail(), out.roles(), out.activeRole());
       String refresh = jwtService.generateRefreshToken(out.user().getEmail());
 
-
-      return ResponseEntity.ok(
-          new LoginResponse()
-          .setToken(token)
-          .setRefreshToken(refresh)
-          .setExpiresIn(jwtService.getExpirationTime())
-          
-      );
+      return ResponseEntity.ok(new LoginResponse()
+          .setToken(access)
+          .setRefreshToken(refresh)                  // <- se entrega en login
+          .setExpiresIn(jwtService.getExpirationTime()));
     }
+
     
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody RefreshRequest req) {
-    	  if (req == null || req.refreshToken() == null) {
-    	    return ResponseEntity.badRequest().body(Map.of("error","MISSING_RT"));
-    	  }
-    	  String rt = req.refreshToken();
+    public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest req) {
+      if (req == null || req.refreshToken() == null) return ResponseEntity.badRequest().build();
+      String rt = req.refreshToken();
+      try {
+        if (jwtService.isTokenExpired(rt) || !jwtService.isRefreshToken(rt)) {
+          return ResponseEntity.status(401).build();
+        }
+        String email = jwtService.extractUsername(rt);
+        var roles  = authenticationService.getRolesByEmail(email);
+        var active = authenticationService.pickDefaultRole(roles);
+        String newAccess = jwtService.generateAccessToken(email, roles, active);
 
-    	  try {
-    	    // Primero verifica firma/exp
-    	    if (jwtService.isTokenExpired(rt)) {
-    	      return ResponseEntity.status(401).body(Map.of("error","RT_EXPIRED"));
-    	    }
-    	    if (!jwtService.isRefreshToken(rt)) {
-    	      return ResponseEntity.status(401).body(Map.of("error","NOT_REFRESH"));
-    	    }
-    	  } catch (io.jsonwebtoken.ExpiredJwtException e) {
-    	    return ResponseEntity.status(401).body(Map.of("error","RT_EXPIRED_EX"));
-    	  } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
-    	    return ResponseEntity.status(401).body(Map.of("error","RT_INVALID_SIGNATURE"));
-    	  }
-
-    	  String email = jwtService.extractUsername(rt);
-    	  var roles = authenticationService.getRolesByEmail(email);
-    	  var active = authenticationService.pickDefaultRole(roles);
-    	  String newAccess = jwtService.generateAccessToken(email, roles, active);
-
-    	  return ResponseEntity.ok(
-    	      new LoginResponse().setToken(newAccess)
-    	                         .setExpiresIn(jwtService.getExpirationTime())
-    	                         .setRefreshToken(null) // usamos el mismo RT hasta que caduque
-    	  );
-    	}
-
+        return ResponseEntity.ok(new LoginResponse()
+            .setToken(newAccess)
+            .setExpiresIn(jwtService.getExpirationTime())
+            .setRefreshToken(null)); // reusamos el MISMO refresh hasta su caducidad
+      } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+        return ResponseEntity.status(401).build();
+      }
+    }
 }

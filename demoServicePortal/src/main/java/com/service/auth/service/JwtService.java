@@ -80,13 +80,12 @@ public class JwtService {
     }
 
     @SuppressWarnings("deprecation")
-	public Claims extractAllClaims(String token) {
-       
-    	return Jwts
-    			.parser()
-    			.setSigningKey(getSignInKey())
-                .parseClaimsJws(token)
-                .getBody();
+    public Claims extractAllClaims(String token) {
+      return Jwts.parser()
+        .setSigningKey(getSignInKey())
+        .setAllowedClockSkewSeconds(5) // pequeña tolerancia anti “race”
+        .parseClaimsJws(token)
+        .getBody();
     }
 
     private Key getSignInKey() {
@@ -99,26 +98,27 @@ public class JwtService {
     	  claims.put("roles", allRoles.stream().map(Role::name).toArray(String[]::new));
     	  claims.put("role", activeRole.name());
     	  return buildToken(claims, subject, jwtExpiration);
-    	}
+    }
 
-    	private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
-    	  return Jwts.builder()
+    private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
+    	return Jwts.builder()
     	      .setClaims(extraClaims)
     	      .setSubject(subject)
     	      .setIssuedAt(new Date())
     	      .setExpiration(new Date(System.currentTimeMillis() + expiration))
     	      .signWith(SignatureAlgorithm.HS256, getSignInKey())
     	      .compact();
-    	}
-    public String generateAccessToken(String subject, Set<Role> allRoles, Role activeRole) {
-    	Map<String, Object> claims = new HashMap<>();
-        if (allRoles != null) claims.put("roles", allRoles.stream().map(Role::name).toArray(String[]::new));
-        if (activeRole != null) claims.put("role", activeRole.name());
-        claims.put("typ", "access");
-        return buildToken(claims, subject, jwtExpiration);
+    }
+    public String generateAccessToken(String subject, Set<Role> roles, Role activeRole) {
+    	Map<String,Object> claims = new HashMap<>();
+    	claims.put("typ", "access");
+    	if (roles != null) claims.put("roles", roles.stream().map(Role::name).toArray(String[]::new));
+    	if (activeRole != null) claims.put("role", activeRole.name());
+    	return buildToken(claims, subject, jwtExpiration);
     }
 
     public String generateRefreshToken(String subject) {
+    	System.out.println("generateRefreshToken");
     	Map<String, Object> claims = new HashMap<>();
         claims.put("typ", "refresh");
         return buildToken(claims, subject, refreshExpiration);
