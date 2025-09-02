@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ public class ProfessionalAvailabilityController {
 	private ProfessionalAvailabilityRepository repo;
 	
 	@PostMapping("/add/list")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<?> setList(@RequestBody List<ProfessionalAvailability> list) {
 		repo.saveAll(list);
 		return ResponseEntity.ok("Schedules successfully added");
@@ -38,6 +40,7 @@ public class ProfessionalAvailabilityController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<?> deleteProfessionalAvailability(@PathVariable("id") Long id) {
 		repo.deleteById(id);
 		return ResponseEntity.ok("Schedules deleted");

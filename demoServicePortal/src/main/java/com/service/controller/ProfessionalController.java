@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.service.dto.ProfessionalDTO;
@@ -23,17 +24,11 @@ public class ProfessionalController {
 	private ProfessionalRepository repo;
 	
 	@PostMapping("/add")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<Professional> setProfessional(@Valid @RequestBody ProfessionalDTO dto) {
 		Professional newProfessional = repo.save(dto.toEntity());
 	    return ResponseEntity.ok(newProfessional);
 	}
-	/*
-	@GetMapping("/get/{id}")
-	public ResponseEntity<Professional> getProfessional(@PathVariable Long id){
-		Professional p = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
-		return ResponseEntity.ok(p);
-	}
-	*/
 	
 	@GetMapping("/get/{email}")
 	public ResponseEntity<Professional> getProfessionalByEmail(@PathVariable String email){
@@ -58,6 +53,7 @@ public class ProfessionalController {
 	}
 	
 	@PutMapping("/edit/{id}")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<Professional> editProfessional(@PathVariable Long id, @RequestBody ProfessionalDTO dto) {
 		Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 		dto.updateEntity(existing);
@@ -66,6 +62,7 @@ public class ProfessionalController {
 	}
 	
 	@PutMapping("/edit/modality/{id}")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<Professional> editModalityProfessional(@PathVariable Long id, @RequestBody ProfessionalDTO dto) {
 		Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 		dto.updateModality(existing);
@@ -73,6 +70,7 @@ public class ProfessionalController {
 	}
 	
 	@PutMapping("/edit/status/{id}")
+	@PreAuthorize("hasAuthority('ADMIN','PROFESSIONAL')")
 	@Transactional
 	public ResponseEntity<Professional> updateStatus(@PathVariable Long id, @RequestParam(name = "status") ProfileStatus status) {
 	    System.out.println("updateStatus id=" + id + " status=" + status);
@@ -82,6 +80,7 @@ public class ProfessionalController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<?> deleteProfessional(@PathVariable Long id) {
 		repo.deleteById(id);
 		return ResponseEntity.ok("Professional deleted");

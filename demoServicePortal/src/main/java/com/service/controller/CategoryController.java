@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,19 +28,20 @@ public class CategoryController {
 	private CategoryRepository repo;
 	
 	@PostMapping("/add")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Category> setCattegory(@Valid @RequestBody Category category) {
 		Category p = repo.save(category);
 		return ResponseEntity.ok(p);
 	}
 	
-	@GetMapping("/all")
-	//@PreAuthorize("hasAuthority('ADMIN')")
+	@GetMapping("/all")	
 	 public ResponseEntity<List<Category>> getAllCategories() {
 		List<Category> list = repo.findAll();
 		return ResponseEntity.ok(list);
 	}
 	
 	@PutMapping("/edit/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Long> editCategory(@PathVariable Long id, @RequestBody CategoryDTO dto) {
 		Category existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found",1001));
 		dto.updateEntity(existing);
@@ -48,6 +50,7 @@ public class CategoryController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<?> deleteCategory(@PathVariable("id") Long id) {
 		repo.deleteById(id);			
 		return ResponseEntity.ok("Category deleted");	

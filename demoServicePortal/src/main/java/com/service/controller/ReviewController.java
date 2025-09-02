@@ -18,16 +18,19 @@ public class ReviewController {
 	@Autowired ReviewService reviewService;
 	
 	@GetMapping("/queue")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public Page<ReviewQueueItem> getQueue(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="10") int size, @RequestParam(required=false) String q) {
 		return reviewService.getQueue(page, size, q);
 	}
 	
 	@GetMapping("/bundle/{professionalId}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ProfessionalReviewDTO getBundle(@PathVariable Long professionalId) {
 		return reviewService.getBundle(professionalId);
 	}
 	
 	@PostMapping("/decision/{professionalId}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Void> decide(@PathVariable Long professionalId, @RequestBody ReviewDecisionRequest req, Authentication auth) {
 		//reviewService.decide(professionalId, req, auth.getName());
 		final String reviewer = (auth != null && auth.getName() != null) ? auth.getName() : "system";

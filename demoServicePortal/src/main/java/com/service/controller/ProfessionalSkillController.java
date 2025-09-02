@@ -3,6 +3,7 @@ package com.service.controller;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.service.dto.IProfessionalSkillDTO;
 import com.service.model.ProfessionalSkill;
@@ -16,6 +17,7 @@ public class ProfessionalSkillController {
 	private ProfessionalSkillRepository repo;
 	
 	@PostMapping("/add/list")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<?> setProfessionalSkillList( @RequestBody List<ProfessionalSkill> listSkill) {
 		
 		repo.saveAll(listSkill);
@@ -29,6 +31,7 @@ public class ProfessionalSkillController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<?> deleteProfessionalSkill(@PathVariable Long id) {
 		repo.deleteById(id);
 		return ResponseEntity.ok("Skill deleted");

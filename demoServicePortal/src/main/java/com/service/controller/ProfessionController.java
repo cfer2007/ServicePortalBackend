@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.service.dto.IProfessionDTO;
@@ -22,6 +23,7 @@ public class ProfessionController {
 	private ProfessionRepository repo;
 	
 	@PostMapping("/add")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Profession> setProfession(@Valid @RequestBody Profession profession) {
 		Profession p = repo.save(profession);
 		return ResponseEntity.ok(p);
@@ -34,13 +36,13 @@ public class ProfessionController {
 	}
 	
 	@GetMapping("/all")
-	//@PreAuthorize("hasAuthority('ADMIN')")
-	  public ResponseEntity<List<Profession>> getAllProfessions() {
+	public ResponseEntity<List<Profession>> getAllProfessions() {
 		List<Profession> list = repo.findAll();
 		return ResponseEntity.ok(list);
 	}
 	
 	@PutMapping("/edit/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Long> editProfession(@PathVariable Long id, @RequestBody ProfessionDTO dto) {
 		Profession existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Profession not found",1001));
 		dto.updateEntity(existing);
@@ -49,6 +51,7 @@ public class ProfessionController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<?> deleteProfession(@PathVariable("id") Long id) {
 		repo.deleteById(id);			
 		return ResponseEntity.ok("Profession deleted");	

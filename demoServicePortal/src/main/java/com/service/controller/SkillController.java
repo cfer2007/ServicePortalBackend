@@ -3,6 +3,7 @@ package com.service.controller;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.service.dto.ISkillDTO;
 import com.service.dto.SkillDTO;
@@ -20,6 +21,7 @@ public class SkillController {
 	private SkillRepository repo;
 		
 	@PostMapping("/add")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Skill> setSkill(@Valid @RequestBody SkillDTO dto) {
 		Skill newSkill = repo.save(dto.toEntity());		
 		return ResponseEntity.ok(newSkill);
@@ -32,6 +34,7 @@ public class SkillController {
 	}
 	
 	@PutMapping("/edit/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Long> editSkill(@PathVariable Long id,@RequestBody SkillDTO dto) {
 		Skill existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Skill "+dto.getName()+" not found",1002));
 		dto.updateEntity(existing);
@@ -40,6 +43,7 @@ public class SkillController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<?> deleteSkill(@PathVariable Long id) {
 		repo.deleteById(id);
 		return ResponseEntity.ok("Skill deleted");

@@ -10,6 +10,7 @@ import com.service.repository.ProfessionalRepository;
 import com.service.service.ProfessionalValidationService;
 
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,7 @@ class LegacyProfessionalDocumentController {
 
     @PostMapping(value = "/upload/{professionalId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
+    @PreAuthorize("hasAuthority('PROFESSIONAL')")
     public ResponseEntity<?> legacyUpload(
         @PathVariable Long professionalId,
         @RequestParam("file") MultipartFile file,
@@ -113,6 +115,7 @@ class LegacyProfessionalDocumentController {
     
     @PutMapping(value = "/update/{documentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
+    @PreAuthorize("hasAuthority('PROFESSIONAL')")
     public ResponseEntity<?> update(
         @PathVariable Long documentId,
         @RequestParam("file") MultipartFile file,

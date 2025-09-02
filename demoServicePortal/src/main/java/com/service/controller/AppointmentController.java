@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,7 @@ public class AppointmentController {
 	private AppointmentRepository repo;
 	
 	@PostMapping("/add")
+	@PreAuthorize("hasAuthority('USER')")
 	public ResponseEntity<Appointment> setAppointment(@RequestBody Appointment appointment) {
 		appointment.setStatus(ReservationStatus.PENDING);
 		Appointment app = repo.save(appointment);
@@ -52,6 +54,7 @@ public class AppointmentController {
 	}
 	
 	@PutMapping("/edit/{id}")
+	@PreAuthorize("hasAuthority('USER')")
 	public ResponseEntity<?> editAppointment(@PathVariable Long id, @RequestBody AppointmentDTO dto){
 		Appointment existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appointment not found", 1001));
 		dto.updateEntity(existing);
