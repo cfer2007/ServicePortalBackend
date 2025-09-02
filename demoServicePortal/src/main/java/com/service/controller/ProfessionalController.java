@@ -70,7 +70,7 @@ public class ProfessionalController {
 	}
 	
 	@PutMapping("/edit/status/{id}")
-	@PreAuthorize("hasAuthority('ADMIN','PROFESSIONAL')")
+	@PreAuthorize("hasAnyAuthority('ADMIN','PROFESSIONAL')")
 	@Transactional
 	public ResponseEntity<Professional> updateStatus(@PathVariable Long id, @RequestParam(name = "status") ProfileStatus status) {
 	    System.out.println("updateStatus id=" + id + " status=" + status);
