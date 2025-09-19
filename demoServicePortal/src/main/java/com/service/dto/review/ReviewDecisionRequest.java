@@ -2,8 +2,6 @@ package com.service.dto.review;
 
 import java.util.List;
 
-import com.service.enums.DocumentType;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

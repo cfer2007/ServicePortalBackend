@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.service.dto.AppointmentDTO;
-import com.service.enums.ReservationStatus;
+import com.service.enums.AppointmentStatus;
 import com.service.exception.ResourceNotFoundException;
 import com.service.model.Appointment;
 import com.service.repository.AppointmentRepository;
@@ -30,19 +30,33 @@ public class AppointmentController {
 	@PostMapping("/add")
 	@PreAuthorize("hasAuthority('USER')")
 	public ResponseEntity<Appointment> setAppointment(@RequestBody Appointment appointment) {
-		appointment.setStatus(ReservationStatus.PENDING);
+		appointment.setStatus(AppointmentStatus.PENDING);
+		Appointment app = repo.save(appointment);
+		return ResponseEntity.ok(app);
+	}
+	
+	@PostMapping("/add/blocked")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
+	public ResponseEntity<Appointment> setBlockAppointment(@RequestBody Appointment appointment) {
+		//System.out.println(appointment.getProfessionalAvailability().getProfessionalAvailabilityId());
+		//System.out.println(appointment.getStatus());
+		//System.out.println(appointment.getProfessionalAvailability());
+		//System.out.println(appointment.getProfessional().getProfessionalId());
+		
 		Appointment app = repo.save(appointment);
 		return ResponseEntity.ok(app);
 	}
 	
 	@GetMapping("/list/professional/{id}")
-	public ResponseEntity<List<Appointment>> getAppointmentsByProfessional(@PathVariable Long id, @RequestParam String status) {
-		List<ReservationStatus> statusList = Arrays.stream(status.split(","))
-                .map(String::trim)
-                .map(ReservationStatus::valueOf)
-                .toList();
-		
-	    List<Appointment> list = repo.getAppointmentsByProfessional(id, statusList);
+	public ResponseEntity<List<Appointment>> getActiveAppointmentsByProfessional(@PathVariable Long id, @RequestParam String status) {
+		List<String> statusList = Arrays.stream(status.split(",")).map(String::trim).toList();		
+	    List<Appointment> list = repo.getActiveAppointmentsByProfessional(id, statusList);
+	    return ResponseEntity.ok(list);
+	}
+	
+	@GetMapping("/list/professional/records/{id}")
+	public ResponseEntity<List<Appointment>> getProfessionalRecords(@PathVariable Long id) {		
+	    List<Appointment> list = repo.getProfessionalRecords(id);
 	    return ResponseEntity.ok(list);
 	}
 
@@ -54,7 +68,7 @@ public class AppointmentController {
 	}
 	
 	@PutMapping("/edit/{id}")
-	@PreAuthorize("hasAuthority('USER')")
+	@PreAuthorize("hasAnyAuthority('USER','PROFESSIONAL')")
 	public ResponseEntity<?> editAppointment(@PathVariable Long id, @RequestBody AppointmentDTO dto){
 		Appointment existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appointment not found", 1001));
 		dto.updateEntity(existing);

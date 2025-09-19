@@ -12,8 +12,6 @@ import java.util.UUID;
 @Service
 public class LocalFileStorageService implements FileStorageService {
 
-    private final Path root = Paths.get("./uploads"); // mapea en Spring a recursos estáticos
-
     @Override
     public String store(Long professionalId, MultipartFile file, String subfolder) throws Exception {
         String original = file.getOriginalFilename();

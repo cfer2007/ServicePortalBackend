@@ -1,17 +1,17 @@
 package com.service.dto;
 
-import com.service.enums.ReservationStatus;
+import com.service.enums.AppointmentStatus;
 import com.service.model.Appointment;
 
 public class AppointmentDTO {
 
-	private ReservationStatus status;
+	private AppointmentStatus status;
 	
-	public ReservationStatus getStatus() {
+	public AppointmentStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(ReservationStatus status) {
+	public void setStatus(AppointmentStatus status) {
 		this.status = status;
 	}
 	/*

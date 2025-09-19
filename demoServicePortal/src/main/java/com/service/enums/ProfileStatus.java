@@ -11,5 +11,6 @@ public enum ProfileStatus {
 	  REQUIRES_CHANGES,
 	  APPROVED, 
 	  REJECTED, 
-	  ACTIVE	  
+	  ACTIVE,
+	  DISABLED
 }
