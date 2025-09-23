@@ -85,4 +85,10 @@ public class ProfessionalController {
 		repo.deleteById(id);
 		return ResponseEntity.ok("Professional deleted");
 	}
+	
+	@GetMapping("/search")
+	public ResponseEntity<List<Professional>> searchProfessionals(@RequestParam String query) {
+	    List<Professional> results = repo.searchByKeyword(query);
+	    return ResponseEntity.ok(results);
+	}
 }

@@ -35,7 +35,19 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 		        (u IS NOT NULL AND LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%')))
 		      )
 		  """)
-	Page<Professional> searchQueue(@Param("statuses") java.util.List<ProfileStatus> statuses,
-			                               @Param("q") String q,
-			                               Pageable pageable);
+	Page<Professional> searchQueue(@Param("statuses") java.util.List<ProfileStatus> statuses, @Param("q") String q, Pageable pageable);
+	
+	@Query(value = """
+		    SELECT DISTINCT p.* 
+		    FROM professional p
+		    LEFT JOIN profession prof ON p.profession_id = prof.profession_id
+		    LEFT JOIN category c ON prof.category_id = c.category_id
+		    LEFT JOIN professional_skill ps ON p.professional_id = ps.professional_id
+		    LEFT JOIN skill s ON ps.skill_id = s.skill_id
+		    WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+		       OR LOWER(prof.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+		       OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+		    """, nativeQuery = true)
+		List<Professional> searchByKeyword(@Param("keyword") String keyword);
+
 }
