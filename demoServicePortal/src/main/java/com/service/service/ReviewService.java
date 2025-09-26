@@ -77,6 +77,7 @@ public class ReviewService {
 
         di.type = d.getType();
         di.status = d.getStatus();
+        di.statusReason = d.getStatusReason();
         di.required = d.isRequired();
         di.readable = d.isReadable();
 

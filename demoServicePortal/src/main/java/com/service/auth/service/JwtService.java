@@ -100,7 +100,8 @@ public class JwtService {
     	  return buildToken(claims, subject, jwtExpiration);
     }
 
-    private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
+    @SuppressWarnings("deprecation")
+	private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
     	return Jwts.builder()
     	      .setClaims(extraClaims)
     	      .setSubject(subject)

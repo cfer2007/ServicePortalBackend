@@ -156,7 +156,7 @@ public class ProfessionalDTO {
 	    entity.setExperienceYears(this.experienceYears);
 	    entity.setRate_type(this.rate_type);
 	    entity.setRate(this.rate);
-	    entity.setStatus(this.status);
+	    //entity.setStatus(this.status);
 	    entity.setModality(this.modality);
 	}
 	

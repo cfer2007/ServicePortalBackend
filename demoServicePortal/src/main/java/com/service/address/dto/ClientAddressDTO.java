@@ -3,7 +3,6 @@ package com.service.address.dto;
 import com.service.address.model.Address;
 import com.service.address.model.City;
 import com.service.model.Client;
-import com.service.model.Professional;
 
 public class ClientAddressDTO {
 
@@ -12,7 +11,6 @@ public class ClientAddressDTO {
 	private Double latitude;
 	private Double longitude;
 	private Long clientId;
-	//private Long ProfessionalId;
 	private Long cityId;
 		
 	public String getName() {
@@ -44,13 +42,7 @@ public class ClientAddressDTO {
 	}
 	public void setClientId(Long clientId) {
 		this.clientId = clientId;
-	}
-	/*public Long getProfessionalId() {
-		return ProfessionalId;
-	}
-	public void setProfessionalId(Long professionalId) {
-		ProfessionalId = professionalId;
-	}*/	
+	}	
 	public Long getCityId() {
 		return cityId;
 	}
@@ -62,15 +54,11 @@ public class ClientAddressDTO {
 		City c = new City();
 		c.setCityId(this.cityId);
 		
-		//Professional p = new Professional();
-		//p.setProfessionalId(this.ProfessionalId);
-		
 		Client cli = new Client();
 		cli.setClientId(this.clientId);
 		
 		Address a = new Address();
 		a.setCity(c);
-		//a.setProfessional(p);
 		a.setClient(cli);
 		a.setName(this.name);
 		a.setStreetAddress(this.StreetAddress);
@@ -85,12 +73,8 @@ public class ClientAddressDTO {
 		Client client = new Client();
 		client.setClientId(this.clientId);
 		
-		//Professional professional = new Professional();
-		//professional.setProfessionalId(this.ProfessionalId);
-		
 		entity.setCity(city);
 		entity.setClient(client);
-		//entity.setProfessional(professional);
 		entity.setName(this.name);
 		entity.setStreetAddress(this.StreetAddress);
 		entity.setLatitude(this.latitude);

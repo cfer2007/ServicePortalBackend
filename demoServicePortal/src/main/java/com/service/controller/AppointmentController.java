@@ -38,11 +38,6 @@ public class AppointmentController {
 	@PostMapping("/add/blocked")
 	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<Appointment> setBlockAppointment(@RequestBody Appointment appointment) {
-		//System.out.println(appointment.getProfessionalAvailability().getProfessionalAvailabilityId());
-		//System.out.println(appointment.getStatus());
-		//System.out.println(appointment.getProfessionalAvailability());
-		//System.out.println(appointment.getProfessional().getProfessionalId());
-		
 		Appointment app = repo.save(appointment);
 		return ResponseEntity.ok(app);
 	}
@@ -55,16 +50,24 @@ public class AppointmentController {
 	}
 	
 	@GetMapping("/list/professional/records/{id}")
-	public ResponseEntity<List<Appointment>> getProfessionalRecords(@PathVariable Long id) {		
-	    List<Appointment> list = repo.getProfessionalRecords(id);
+	public ResponseEntity<List<Appointment>> getProfessionalRecords(@PathVariable Long id, @RequestParam String status) {	
+		List<String> statusList = Arrays.stream(status.split(",")).map(String::trim).toList();
+		List<Appointment> list = repo.getProfessionalRecords(id, statusList);
 	    return ResponseEntity.ok(list);
 	}
-
 	
 	@GetMapping("/list/client/{id}")
-	public ResponseEntity<List<Appointment>> getAppointmentsByClient(@PathVariable Long id){		
-		List<Appointment> list = repo.getAppointmentsByClient(id);
+	public ResponseEntity<List<Appointment>> getAppointmentsByClient(@PathVariable Long id, @RequestParam String status){		
+		List<String> statusList = Arrays.stream(status.split(",")).map(String::trim).toList();
+		List<Appointment> list = repo.getActiveAppointmentsByClient(id,statusList);
 		return ResponseEntity.ok(list);
+	}
+	
+	@GetMapping("/list/client/records/{id}")
+	public ResponseEntity<List<Appointment>> getClientRecords(@PathVariable Long id, @RequestParam String status) {	
+		List<String> statusList = Arrays.stream(status.split(",")).map(String::trim).toList();
+		List<Appointment> list = repo.getclientRecords(id, statusList);
+	    return ResponseEntity.ok(list);
 	}
 	
 	@PutMapping("/edit/{id}")
