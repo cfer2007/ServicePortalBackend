@@ -44,7 +44,7 @@ class LegacyProfessionalDocumentController {
         @PathVariable Long professionalId,
         @RequestParam("file") MultipartFile file,
         @RequestParam(value = "type", required = false) DocumentType legacyType,
-        @RequestParam(value = "docType", required = false) DocumentType docType // por si ya mandan el nuevo
+        @RequestParam(value = "docType", required = false) DocumentType docType
     ) {
         try {
             DocumentType effectiveType = (docType != null) ? docType : legacyType;
@@ -72,15 +72,42 @@ class LegacyProfessionalDocumentController {
 
             String url = "/uploads/professionals/" + professionalId + "/" + storedName;
 
-            ProfessionalDocument doc = new ProfessionalDocument();
-            doc.setProfessional(professional);
-            doc.setType(effectiveType);
+            // 🔹 Buscar si ya existe documento del mismo tipo
+            Optional<ProfessionalDocument> existingOpt =
+                documentRepo.findByProfessional_ProfessionalIdAndType(professionalId, effectiveType);
+
+            ProfessionalDocument doc;
+            if (existingOpt.isPresent()) {
+                // actualizar documento existente
+                doc = existingOpt.get();
+
+                // borrar archivo previo si existe
+                try {
+                    String oldUrl = doc.getUrl();
+                    if (oldUrl != null && oldUrl.startsWith("/uploads/")) {
+                        Path oldPath = Path.of(oldUrl.substring(1)).normalize();
+                        Path root = Path.of("uploads").toAbsolutePath().normalize();
+                        if (oldPath.toAbsolutePath().startsWith(root)) {
+                            Files.deleteIfExists(oldPath);
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+            } else {
+                // crear documento nuevo
+                doc = new ProfessionalDocument();
+                doc.setProfessional(professional);
+                doc.setType(effectiveType);
+            }
+
             doc.setStatus(DocumentStatus.PENDING);
             doc.setReadable(true);
             doc.setFileName(originalName);
             doc.setContentType(file.getContentType());
             doc.setSizeBytes(file.getSize());
             doc.setUrl(url);
+            doc.setDate(Instant.now());
+            doc.setStatusReason(null);
 
             ProfessionalDocument saved = documentRepo.save(doc);
 

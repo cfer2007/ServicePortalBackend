@@ -1,7 +1,11 @@
 package com.service.model;
 
+import com.service.enums.AvailabilityStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,6 +35,10 @@ public class ProfessionalAvailability {
 	
 	@Column
 	private String endTime;
+	
+	@Column 
+	@Enumerated(EnumType.STRING)
+	private AvailabilityStatus status;
 
 	public Long getProfessionalAvailabilityId() {
 		return professionalAvailabilityId;
@@ -71,4 +79,12 @@ public class ProfessionalAvailability {
 	public void setEndTime(String endTime) {
 		this.endTime = endTime;
 	}
+
+	public AvailabilityStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(AvailabilityStatus status) {
+		this.status = status;
+	}	
 }

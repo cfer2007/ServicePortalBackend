@@ -42,7 +42,6 @@ public class ProfessionalController {
 	@GetMapping("/getList/{id}")
 	public ResponseEntity<List<Professional>> getProfessionalBySkill(@PathVariable Long id){
 		List<Professional> list = repo.findProfessionalsBySkill(id);
-		
 		return ResponseEntity.ok(list);
 	}
 	
@@ -63,7 +62,7 @@ public class ProfessionalController {
 	
 	@PutMapping("/edit/modality/{id}")
 	@PreAuthorize("hasAuthority('PROFESSIONAL')")
-	public ResponseEntity<Professional> editModalityProfessional(@PathVariable Long id, @RequestBody ProfessionalDTO dto) {
+	public ResponseEntity<Professional> editModalityProfessional(@PathVariable Long id, @RequestBody ProfessionalDTO dto) {		
 		Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 		dto.updateModality(existing);
 		return ResponseEntity.ok(repo.save(existing));
@@ -73,7 +72,6 @@ public class ProfessionalController {
 	@PreAuthorize("hasAnyAuthority('ADMIN','PROFESSIONAL')")
 	@Transactional
 	public ResponseEntity<Professional> updateStatus(@PathVariable Long id, @RequestParam(name = "status") ProfileStatus status) {
-	    System.out.println("updateStatus id=" + id + " status=" + status);
 	    Professional existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Professional "+id+" not found",1003));
 	    existing.setStatus(status);
 	    return ResponseEntity.ok(repo.save(existing));

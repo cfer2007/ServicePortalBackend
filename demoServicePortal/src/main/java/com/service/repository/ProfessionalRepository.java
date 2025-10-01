@@ -20,7 +20,7 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 			+ "FROM professional p\n"
 			+ "INNER JOIN professional_skill ps\n"
 			+ "  ON p.professional_id = ps.professional_id\n"
-			+ "WHERE ps.skill_id = :id ", nativeQuery = true)
+			+ "WHERE ps.skill_id = :id and status = 'ACTIVE'", nativeQuery = true)
 	List<Professional> findProfessionalsBySkill(@Param("id")Long id);
 	
 	@Query("""
