@@ -25,6 +25,9 @@ public class Client {
 	@Column
 	private String lastName;
 	
+	@Column
+	private String phone;
+	
 	@ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = true)
 	private User user;
@@ -51,6 +54,14 @@ public class Client {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 	public User getUser() {
