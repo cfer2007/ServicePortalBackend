@@ -27,12 +27,6 @@ public class AddressController {
 	@Autowired
 	private AddressRepository repo;
 	
-	/*
-	@PostMapping("/add")
-	public ResponseEntity<Address> setAddress(@RequestBody Address address){
-		Address newAddress = repo.save(address);
-		return ResponseEntity.ok(newAddress);
-	}*/
 	@PostMapping("/add/professional")
 	public ResponseEntity<Address> setProfessionlAddress(@RequestBody ProfessionalAddressDTO dto){
 		Address newAddress = repo.save(dto.toEntity());
@@ -67,6 +61,8 @@ public class AddressController {
 	
 	@PutMapping("/edit/client/{id}")
 	public ResponseEntity<Address> editClientAddress(@PathVariable Long id, @RequestBody ClientAddressDTO dto){
+		System.out.println(dto.getLongitude());
+		System.out.println(dto.getLatitude());
 		Address existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Address "+id+" not found", 1003));
 		dto.updateEntity(existing);
 		Address updated = repo.save(existing);		

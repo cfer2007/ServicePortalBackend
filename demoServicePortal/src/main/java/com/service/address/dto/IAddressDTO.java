@@ -9,4 +9,6 @@ public interface IAddressDTO {
 	Long getCityId();
 	String getCityName();
 	String getStreetAddress();
+	Double getLongitude();
+	Double getLatitude();
 }

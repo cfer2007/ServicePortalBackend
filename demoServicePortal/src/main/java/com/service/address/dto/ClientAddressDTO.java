@@ -60,6 +60,8 @@ public class ClientAddressDTO {
 		Address a = new Address();
 		a.setCity(c);
 		a.setClient(cli);
+		a.setLatitude(this.latitude);
+		a.setLongitude(this.longitude);
 		a.setName(this.name);
 		a.setStreetAddress(this.StreetAddress);
 		
