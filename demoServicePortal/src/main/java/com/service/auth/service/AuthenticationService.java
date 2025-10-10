@@ -89,7 +89,7 @@ public class AuthenticationService {
                 	Professional p = new Professional();
                 	p.setName(user.getName());
                 	p.setUser(user);
-                	p.setStatus(ProfileStatus.PENDING_ID_VERIFICATION);
+                	p.setStatus(ProfileStatus.PENDING_PROFILE_INFO);
                     professionalRepository.save(p);
                 }
             }
