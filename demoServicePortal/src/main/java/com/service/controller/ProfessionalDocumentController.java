@@ -101,13 +101,13 @@ class LegacyProfessionalDocumentController {
             }
 
             doc.setStatus(DocumentStatus.PENDING);
-            doc.setReadable(true);
+            //doc.setReadable(true);
             doc.setFileName(originalName);
             doc.setContentType(file.getContentType());
-            doc.setSizeBytes(file.getSize());
+            //doc.setSizeBytes(file.getSize());
             doc.setUrl(url);
             doc.setDate(Instant.now());
-            doc.setStatusReason(null);
+            //doc.setStatusReason(null);
 
             ProfessionalDocument saved = documentRepo.save(doc);
 
@@ -196,10 +196,10 @@ class LegacyProfessionalDocumentController {
             doc.setUrl(newUrl);
             doc.setFileName(originalName);
             doc.setContentType(file.getContentType());
-            doc.setSizeBytes(file.getSize());
+            //doc.setSizeBytes(file.getSize());
             doc.setDate(Instant.now());
             doc.setStatus(DocumentStatus.PENDING);   // vuelve a pendiente para revisión
-            doc.setStatusReason(null);
+            //doc.setStatusReason(null);
 
             ProfessionalDocument saved = documentRepo.save(doc);
 

@@ -77,14 +77,14 @@ public class ReviewService {
 
         di.type = d.getType();
         di.status = d.getStatus();
-        di.statusReason = d.getStatusReason();
-        di.required = d.isRequired();
-        di.readable = d.isReadable();
+        //di.statusReason = d.getStatusReason();
+        //di.required = d.isRequired();
+        //di.readable = d.isReadable();
 
         // Estos 3 requieren campos en la entidad; comenta si aún no existen
         di.fileName   = /* puede ser null */ d.getFileName();
         di.contentType= /* puede ser null */ d.getContentType();
-        di.sizeBytes  = /* puede ser null */ d.getSizeBytes();
+        //di.sizeBytes  = /* puede ser null */ d.getSizeBytes();
 
         di.url = d.getUrl(); // puede ser null; el frontend ya maneja fallback
         return di;
@@ -152,7 +152,7 @@ public class ReviewService {
           if (st == com.service.enums.DocumentStatus.PENDING ||
               st == com.service.enums.DocumentStatus.REQUIRES_CHANGES) {
             d.setStatus(com.service.enums.DocumentStatus.APPROVED);
-            d.setStatusReason(null);
+            //d.setStatusReason(null);
           }
         }
         documentRepo.saveAll(docs);
@@ -201,7 +201,7 @@ public class ReviewService {
           }
 
           doc.setStatus(com.service.enums.DocumentStatus.REQUIRES_CHANGES);
-          doc.setStatusReason(comment);
+          //doc.setStatusReason(comment);
           // Si quieres, también puedes marcar readable=false cuando se piden cambios por legibilidad
           // doc.setReadable(Boolean.TRUE.equals(doc.isReadable()) ? doc.isReadable() : false);
           documentRepo.save(doc);

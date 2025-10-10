@@ -28,7 +28,7 @@ public class ProfessionalValidationService {
 
     for (var d : docs) {
       present.add(d.getType());
-      if (!d.isReadable()) allReadable = false;
+      //if (!d.isReadable()) allReadable = false;
     }
 
     boolean missing = REQUIRED.stream().anyMatch(req -> !present.contains(req));
