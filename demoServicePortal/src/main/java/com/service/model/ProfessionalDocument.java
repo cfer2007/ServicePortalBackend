@@ -43,27 +43,11 @@ public class ProfessionalDocument {
 	@Column
 	private Instant date = Instant.now();
 	
-	
-	/*
-	private Long sizeBytes;	
-	public Long getSizeBytes() { return sizeBytes; }
-	public void setSizeBytes(Long sizeBytes) { this.sizeBytes = sizeBytes; }
-	
-	private boolean required;
-	private boolean readable;	
-	public boolean isRequired() { return required; }
-	public void setRequired(boolean required) { this.required = required; }
-	public boolean isReadable() { return readable; }
-	public void setReadable(boolean readable) { this.readable = readable; }
-	*/
 	@Column
 	private String fileName;
 
 	@Column
 	private String contentType;
-	
-	//@Column(name = "status_reason")
-    //private String statusReason;
 
 	public String getFileName() { return fileName; }
 	public void setFileName(String fileName) { this.fileName = fileName; }

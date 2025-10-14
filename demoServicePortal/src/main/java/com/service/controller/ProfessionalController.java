@@ -40,13 +40,6 @@ public class ProfessionalController {
 	    return ResponseEntity.ok(p);
 	}
 	
-	@GetMapping("/getList/{id}")
-	@PreAuthorize("hasAuthority('USER')")
-	public ResponseEntity<List<Professional>> getProfessionalBySkill(@PathVariable Long id){
-		List<Professional> list = repo.findProfessionalsBySkill(id);
-		return ResponseEntity.ok(list);
-	}
-	
 	@GetMapping("/all")
 	@PreAuthorize("hasAuthority('USER')")
 	public  ResponseEntity<List<Professional>> getAllProfessionalList(){
@@ -88,21 +81,18 @@ public class ProfessionalController {
 	}
 	
 	@GetMapping("/search")
-	@PreAuthorize("hasAuthority('USER')")
-	public ResponseEntity<List<Professional>> searchProfessionals(@RequestParam String query) {
-	    List<Professional> results = repo.searchByKeyword(query);
-	    return ResponseEntity.ok(results);
-	}
-	
-	// 🔹 Buscar por categoría
-    @GetMapping("/byCategory/{categoryId}")
-    public ResponseEntity<List<Professional>> getProfessionalsByCategory(@PathVariable Long categoryId) {
-    	return ResponseEntity.ok(repo.findByCategory(categoryId));
+    public List<Professional> searchProfessionals(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long professionId,
+            @RequestParam(required = false) Long skillId,
+            @RequestParam(required = false) String keyword) {
+		System.out.println(categoryId);
+		System.out.println(professionId);
+		System.out.println(skillId);
+		System.out.println(keyword);
+        List list = repo.searchProfessionals(categoryId, professionId, skillId, keyword);
+        System.out.println(list.size());
+        return list;
     }
 
-    // 🔹 Buscar por profesión
-    @GetMapping("/byProfession/{professionId}")
-    public ResponseEntity<List<Professional>> getProfessionalsByProfession(@PathVariable Long professionId) {
-    	return ResponseEntity.ok(repo.findByProfession(professionId));
-    }
 }

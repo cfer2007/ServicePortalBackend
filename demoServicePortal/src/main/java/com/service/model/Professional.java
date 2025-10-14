@@ -55,8 +55,6 @@ public class Professional {
 	
 	@ManyToOne
     @JoinColumn(name = "professionId", referencedColumnName = "professionId",nullable = true)
-	//@ManyToOne(fetch = FetchType.LAZY, optional = true)
-	//@JoinColumn(name = "profession_id")
 	private Profession profession;
 	
 	@ManyToOne

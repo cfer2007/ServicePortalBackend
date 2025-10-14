@@ -11,5 +11,4 @@ public interface ProfessionalAvailabilityRepository extends JpaRepository<Profes
 
 	@Query(value = "select * from professional_availability where professional_id = ?1", nativeQuery = true)
 	List<ProfessionalAvailability> findByProfesionalId(@Param("id")Long id);
-	//List<ProfessionalAvailability> getProfessionalAvailabilitiesByProfessional(@Param("id")Long id);
 }

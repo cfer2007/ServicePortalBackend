@@ -16,13 +16,6 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 	@Query(value = "select * from professional where user_id = (select id from users where email = ?1)", nativeQuery = true)
 	Professional findByEmail(@Param("id")String email);	
 	
-	@Query(value = "SELECT p.*\n"
-			+ "FROM professional p\n"
-			+ "INNER JOIN professional_skill ps\n"
-			+ "  ON p.professional_id = ps.professional_id\n"
-			+ "WHERE ps.skill_id = :id and status = 'ACTIVE'", nativeQuery = true)
-	List<Professional> findProfessionalsBySkill(@Param("id")Long id);
-	
 	@Query("""
 		    SELECT p
 		    FROM professional p          
@@ -37,36 +30,40 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 		  """)
 	Page<Professional> searchQueue(@Param("statuses") java.util.List<ProfileStatus> statuses, @Param("q") String q, Pageable pageable);
 	
-	@Query(value = """
-		    SELECT DISTINCT p.* 
-		    FROM professional p
-		    LEFT JOIN profession prof ON p.profession_id = prof.profession_id
-		    LEFT JOIN category c ON prof.category_id = c.category_id
-		    LEFT JOIN professional_skill ps ON p.professional_id = ps.professional_id
-		    LEFT JOIN skill s ON ps.skill_id = s.skill_id
-		    WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-		       OR LOWER(prof.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-		       OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-		    """, nativeQuery = true)
-		List<Professional> searchByKeyword(@Param("keyword") String keyword);
 	
 	@Query(value = """
-		    SELECT p.* 
+		    SELECT DISTINCT p.*
 		    FROM professional p
-		    INNER JOIN profession pr ON p.profession_id = pr.profession_id
-		    INNER JOIN category c ON pr.category_id = c.category_id
-		    WHERE c.category_id = :categoryId
-		      AND p.status = 'ACTIVE'
-		""", nativeQuery = true)
-		List<Professional> findByCategory(@Param("categoryId") Long categoryId);
+		    JOIN profession pr ON p.profession_id = pr.profession_id
+		    JOIN category c ON pr.category_id = c.category_id
+		    LEFT JOIN professional_skill ps ON p.professional_id = ps.professional_id
+		    LEFT JOIN skill s ON ps.skill_id = s.skill_id
+		    LEFT JOIN users u ON p.user_id = u.id
+		    WHERE p.status = 'ACTIVE'
+		      AND (
+		        (:professionId IS NULL AND (:categoryId IS NULL OR c.category_id = :categoryId))
+		        OR (:professionId IS NOT NULL AND pr.profession_id = :professionId)
+		      )
+		      AND (:skillId IS NULL OR ps.skill_id = :skillId)
+		      AND (
+		        :keyword IS NULL OR :keyword = '' OR
+		        LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+		        LOWER(pr.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+		        LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+		        LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+		        LOWER(p.last_name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+		        LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+		      )
+		    """, nativeQuery = true)
+		List<Professional> searchProfessionals(
+		    @Param("categoryId") Long categoryId,
+		    @Param("professionId") Long professionId,
+		    @Param("skillId") Long skillId,
+		    @Param("keyword") String keyword
+		);
 
-		@Query(value = """
-		    SELECT p.* 
-		    FROM professional p
-		    WHERE p.profession_id = :professionId
-		      AND p.status = 'ACTIVE'
-		""", nativeQuery = true)
-		List<Professional> findByProfession(@Param("professionId") Long professionId);
+
+
 
 
 }

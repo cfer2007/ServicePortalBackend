@@ -9,10 +9,6 @@ import com.service.model.Skill;
 
 public interface SkillRepository extends JpaRepository<Skill, Long>{
 
-	/*
-	@Query(value = "select skill_id as skillId, name from skill where profession_id=?1", nativeQuery = true)
-	List<ISkillDTO> findByProfessionId(@Param("id")Long id);	
-	*/
 	@Query(value = "select skill_id as skillId, name from skill where category_id=?1", nativeQuery = true)
 	List<ISkillDTO> findByCateogryId(@Param("id")Long id);
 }
