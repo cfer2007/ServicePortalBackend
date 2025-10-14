@@ -21,10 +21,14 @@ public class Skill {
 	
 	@Column
 	private String name;
-	
+	/*
 	@ManyToOne
     @JoinColumn(name = "professionId", referencedColumnName = "professionId",nullable = false)
 	private Profession profession;
+	*/
+	@ManyToOne
+    @JoinColumn(name = "categoryId", referencedColumnName = "categoryId",nullable = false)
+	private Category category;
 	
 	public Long getSkillId() {
 		return skillId;
@@ -41,12 +45,19 @@ public class Skill {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	/*
 	public Profession getProfession() {
 		return profession;
 	}
 
 	public void setProfession(Profession profession) {
 		this.profession = profession;
+	}*/
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
 	}
 }

@@ -31,6 +31,7 @@ public class ProfessionalController {
 	}
 	
 	@GetMapping("/get/{email}")
+	@PreAuthorize("hasAuthority('PROFESSIONAL')")
 	public ResponseEntity<Professional> getProfessionalByEmail(@PathVariable String email){
 	    Professional p = repo.findByEmail(email);
 	    if (p == null) {
@@ -40,12 +41,14 @@ public class ProfessionalController {
 	}
 	
 	@GetMapping("/getList/{id}")
+	@PreAuthorize("hasAuthority('USER')")
 	public ResponseEntity<List<Professional>> getProfessionalBySkill(@PathVariable Long id){
 		List<Professional> list = repo.findProfessionalsBySkill(id);
 		return ResponseEntity.ok(list);
 	}
 	
 	@GetMapping("/all")
+	@PreAuthorize("hasAuthority('USER')")
 	public  ResponseEntity<List<Professional>> getAllProfessionalList(){
 		List<Professional> list = repo.findAll();		
 		return ResponseEntity.ok(list);
@@ -85,8 +88,21 @@ public class ProfessionalController {
 	}
 	
 	@GetMapping("/search")
+	@PreAuthorize("hasAuthority('USER')")
 	public ResponseEntity<List<Professional>> searchProfessionals(@RequestParam String query) {
 	    List<Professional> results = repo.searchByKeyword(query);
 	    return ResponseEntity.ok(results);
 	}
+	
+	// 🔹 Buscar por categoría
+    @GetMapping("/byCategory/{categoryId}")
+    public ResponseEntity<List<Professional>> getProfessionalsByCategory(@PathVariable Long categoryId) {
+    	return ResponseEntity.ok(repo.findByCategory(categoryId));
+    }
+
+    // 🔹 Buscar por profesión
+    @GetMapping("/byProfession/{professionId}")
+    public ResponseEntity<List<Professional>> getProfessionalsByProfession(@PathVariable Long professionId) {
+    	return ResponseEntity.ok(repo.findByProfession(professionId));
+    }
 }

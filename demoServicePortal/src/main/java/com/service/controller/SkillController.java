@@ -26,10 +26,16 @@ public class SkillController {
 		Skill newSkill = repo.save(dto.toEntity());		
 		return ResponseEntity.ok(newSkill);
 	}
-	
+	/*
 	@GetMapping("/get/{id}")
 	public ResponseEntity<List<ISkillDTO>> getListSkillsByProfession(@PathVariable Long id){
 		List<ISkillDTO> list = repo.findByProfessionId(id);
+		return ResponseEntity.ok(list);
+	}*/
+	
+	@GetMapping("/get/{id}")
+	public ResponseEntity<List<ISkillDTO>> getListSkillsByCategory(@PathVariable Long id){
+		List<ISkillDTO> list = repo.findByCateogryId(id);
 		return ResponseEntity.ok(list);
 	}
 	

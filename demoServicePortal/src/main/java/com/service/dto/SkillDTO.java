@@ -1,6 +1,6 @@
 package com.service.dto;
 
-import com.service.model.Profession;
+import com.service.model.Category;
 import com.service.model.Skill;
 
 import jakarta.validation.constraints.NotBlank;
@@ -10,8 +10,7 @@ public class SkillDTO {
 	@NotBlank(message = "Name is required")
 	private String name;
 	
-	//@NotBlank(message = "Profession is required")
-	private Long professionId;
+	private Long categoryId;
 
 	public String getName() {
 		return name;
@@ -20,22 +19,22 @@ public class SkillDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public Long getProfessionId() {
-		return professionId;
-	}
-
-	public void setProfessionId(Long professionId) {
-		this.professionId = professionId;
-	}
 	
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
 	public Skill toEntity() {
-		Profession profession = new Profession();
-	    profession.setProfessionId(this.professionId);
+		Category category = new Category();
+	    category.setCategoryId(this.categoryId);
 	    
 		Skill s = new Skill();
 		s.setName(this.name);
-		s.setProfession(profession);
+		s.setCategory(category);
 		
 		return s;
 	}

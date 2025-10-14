@@ -49,5 +49,24 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 		       OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
 		    """, nativeQuery = true)
 		List<Professional> searchByKeyword(@Param("keyword") String keyword);
+	
+	@Query(value = """
+		    SELECT p.* 
+		    FROM professional p
+		    INNER JOIN profession pr ON p.profession_id = pr.profession_id
+		    INNER JOIN category c ON pr.category_id = c.category_id
+		    WHERE c.category_id = :categoryId
+		      AND p.status = 'ACTIVE'
+		""", nativeQuery = true)
+		List<Professional> findByCategory(@Param("categoryId") Long categoryId);
+
+		@Query(value = """
+		    SELECT p.* 
+		    FROM professional p
+		    WHERE p.profession_id = :professionId
+		      AND p.status = 'ACTIVE'
+		""", nativeQuery = true)
+		List<Professional> findByProfession(@Param("professionId") Long professionId);
+
 
 }

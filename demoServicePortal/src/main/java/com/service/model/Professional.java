@@ -14,7 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-@Table//(name="professional")
+@Table(name="professional")
 @Entity(name="professional")
 public class Professional {
 	
