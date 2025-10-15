@@ -1,6 +1,7 @@
 package com.service.address.dto;
 
 import com.service.address.model.Address;
+import com.service.address.model.AddressClient;
 import com.service.address.model.City;
 import com.service.model.Client;
 
@@ -54,12 +55,8 @@ public class ClientAddressDTO {
 		City c = new City();
 		c.setCityId(this.cityId);
 		
-		Client cli = new Client();
-		cli.setClientId(this.clientId);
-		
 		Address a = new Address();
 		a.setCity(c);
-		a.setClient(cli);
 		a.setLatitude(this.latitude);
 		a.setLongitude(this.longitude);
 		a.setName(this.name);
@@ -72,14 +69,20 @@ public class ClientAddressDTO {
 		City city = new City();
 		city.setCityId(this.cityId);
 		
-		Client client = new Client();
-		client.setClientId(this.clientId);
-		
 		entity.setCity(city);
-		entity.setClient(client);
 		entity.setName(this.name);
 		entity.setStreetAddress(this.StreetAddress);
 		entity.setLatitude(this.latitude);
 		entity.setLongitude(this.longitude);
+	}
+	
+	public AddressClient toAddressClient(Address address) {
+	    Client client = new Client();
+	    client.setClientId(this.clientId);
+
+	    AddressClient link = new AddressClient();
+	    link.setAddress(address);
+	    link.setClient(client);
+	    return link;
 	}
 }

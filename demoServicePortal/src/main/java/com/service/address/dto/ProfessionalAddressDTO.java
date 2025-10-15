@@ -1,8 +1,10 @@
 package com.service.address.dto;
 
 import com.service.address.model.Address;
+import com.service.address.model.AddressProfessional;
 import com.service.address.model.City;
 import com.service.model.Professional;
+import com.service.model.ProfessionalDocument;
 
 public class ProfessionalAddressDTO {
 
@@ -10,9 +12,9 @@ public class ProfessionalAddressDTO {
 	private String StreetAddress;
 	private Double latitude;
 	private Double longitude;
-	//private Long clientId;
-	private Long ProfessionalId;
+	private Long professionalId;
 	private Long cityId;
+	private Long professionalDocumentId;
 		
 	public String getName() {
 		return name;
@@ -38,17 +40,11 @@ public class ProfessionalAddressDTO {
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	/*public Long getClientId() {
-		return clientId;
-	}
-	public void setClientId(Long clientId) {
-		this.clientId = clientId;
-	}*/
 	public Long getProfessionalId() {
-		return ProfessionalId;
+		return professionalId;
 	}
 	public void setProfessionalId(Long professionalId) {
-		ProfessionalId = professionalId;
+		this.professionalId = professionalId;
 	}	
 	public Long getCityId() {
 		return cityId;
@@ -56,21 +52,21 @@ public class ProfessionalAddressDTO {
 	public void setCityId(Long cityId) {
 		this.cityId = cityId;
 	}
+	public Long getProfessionalDocumentId() { 
+		return professionalDocumentId; 
+	}
+    public void setProfessionalDocumentId(Long professionalDocumentId) { 
+    	this.professionalDocumentId = professionalDocumentId; 
+    }
 	
 	public Address toEntity() {
 		City c = new City();
 		c.setCityId(this.cityId);
 		
-		Professional p = new Professional();
-		p.setProfessionalId(this.ProfessionalId);
-		
-		//Client cli = new Client();
-		//cli.setClientId(this.clientId);
-		
 		Address a = new Address();
 		a.setCity(c);
-		a.setProfessional(p);
-		//a.setClient(cli);
+		a.setLatitude(this.latitude);
+		a.setLongitude(this.longitude);
 		a.setName(this.name);
 		a.setStreetAddress(this.StreetAddress);
 		
@@ -81,18 +77,24 @@ public class ProfessionalAddressDTO {
 		City city = new City();
 		city.setCityId(this.cityId);
 		
-		//Client client = new Client();
-		//client.setClientId(this.clientId);
-		
-		Professional professional = new Professional();
-		professional.setProfessionalId(this.ProfessionalId);
-		
 		entity.setCity(city);
-		//entity.setClient(client);
-		entity.setProfessional(professional);
 		entity.setName(this.name);
 		entity.setStreetAddress(this.StreetAddress);
 		entity.setLatitude(this.latitude);
 		entity.setLongitude(this.longitude);
+	}
+	
+	public AddressProfessional toAddressProfessional(Address address) {
+	    Professional profesional = new Professional();
+	    profesional.setProfessionalId(this.professionalId);
+	    
+	    ProfessionalDocument document = new ProfessionalDocument();
+        document.setProfessionalDocumentId(this.professionalDocumentId);
+
+	    AddressProfessional link = new AddressProfessional();
+	    link.setAddress(address);
+	    link.setProfessional(profesional);
+	    link.setDocument(document);
+	    return link;
 	}
 }

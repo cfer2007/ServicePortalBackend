@@ -1,8 +1,5 @@
 package com.service.address.model;
 
-import com.service.model.Client;
-import com.service.model.Professional;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,14 +28,6 @@ public class Address {
 	
 	@Column
 	private Double longitude;
-	
-	@ManyToOne
-	@JoinColumn(name = "clientId", referencedColumnName = "clientId", nullable = true)
-	private Client client;
-	
-	@ManyToOne
-	@JoinColumn(name = "professionalId", referencedColumnName = "professionalId", nullable = true)
-	private Professional professional;
 	
 	@ManyToOne
 	@JoinColumn(name = "cityId", referencedColumnName = "cityId", nullable = false)
@@ -82,22 +71,6 @@ public class Address {
 
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
-	}
-
-	public Client getClient() {
-		return client;
-	}
-
-	public void setClient(Client client) {
-		this.client = client;
-	}
-
-	public Professional getProfessional() {
-		return professional;
-	}
-
-	public void setProfessional(Professional professional) {
-		this.professional = professional;
 	}
 
 	public City getCity() {

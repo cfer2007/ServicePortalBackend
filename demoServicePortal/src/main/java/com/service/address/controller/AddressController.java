@@ -17,8 +17,14 @@ import com.service.address.dto.ProfessionalAddressDTO;
 import com.service.address.dto.ClientAddressDTO;
 import com.service.address.dto.IAddressDTO;
 import com.service.address.model.Address;
+import com.service.address.model.AddressClient;
+import com.service.address.model.AddressProfessional;
+import com.service.address.repository.AddressClientRepository;
+import com.service.address.repository.AddressProfessionalRepository;
 import com.service.address.repository.AddressRepository;
 import com.service.exception.ResourceNotFoundException;
+
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/address")
@@ -27,21 +33,37 @@ public class AddressController {
 	@Autowired
 	private AddressRepository repo;
 	
+	@Autowired
+	private AddressClientRepository clientRepo;
+	
+	@Autowired
+	private AddressProfessionalRepository professionalRepo;
+	
 	@PostMapping("/add/professional")
+	@Transactional
 	public ResponseEntity<Address> setProfessionlAddress(@RequestBody ProfessionalAddressDTO dto){
 		Address newAddress = repo.save(dto.toEntity());
+		AddressProfessional link = dto.toAddressProfessional(newAddress);
+		if(!professionalRepo.existsByAddress_AddressIdAndProfessional_ProfessionalId(newAddress.getAddressId(), dto.getProfessionalId())) {
+			professionalRepo.save(link);
+		}		
 		return ResponseEntity.ok(newAddress);
 	}
 	
 	@PostMapping("/add/client")
-	public ResponseEntity<Address> setClientAddress(@RequestBody ClientAddressDTO dto){
-		Address newAddress = repo.save(dto.toEntity());
-		return ResponseEntity.ok(newAddress);
+	@Transactional
+	public ResponseEntity<Address> setClientAddress(@RequestBody ClientAddressDTO dto) {
+	    Address newAddress = repo.save(dto.toEntity());
+	    AddressClient link = dto.toAddressClient(newAddress);
+	    if (!clientRepo.existsByAddress_AddressIdAndClient_ClientId(newAddress.getAddressId(), dto.getClientId())) {
+	        clientRepo.save(link);
+	    }
+	    return ResponseEntity.ok(newAddress);
 	}
 	
 	@GetMapping("/get/client/{id}")
 	public ResponseEntity<List<IAddressDTO>> getAddressByClientId(@PathVariable Long id){
-		List<IAddressDTO> list = repo.getAdressesByClientId(id);
+		List<IAddressDTO> list = repo.getAddressesByClientId(id);
 		return ResponseEntity.ok(list);
 	}
 	
@@ -70,8 +92,25 @@ public class AddressController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<?> deleteAddress(@PathVariable Long id){
-		repo.deleteById(id);
-		return ResponseEntity.ok("Address deleted");
+	@Transactional
+	public ResponseEntity<?> deleteAddress(@PathVariable Long id) {
+	    // Verificar existencia
+	    Address address = repo.findById(id)
+	        .orElseThrow(() -> new ResourceNotFoundException("Address " + id + " not found", 1003));
+
+	    // 🔹 Eliminar vínculos dependientes primero
+	    if (professionalRepo.existsByAddress_AddressId(id)) {
+	        professionalRepo.deleteByAddress_AddressId(id);
+	    }
+
+	    if (clientRepo.existsByAddress_AddressId(id)) {
+	        clientRepo.deleteByAddress_AddressId(id);
+	    }
+
+	    // 🔹 Luego eliminar la dirección base
+	    repo.delete(address);
+
+	    return ResponseEntity.ok("Address and links deleted atomically ✅");
 	}
+
 }
