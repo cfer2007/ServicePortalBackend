@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.service.auth.dto.ChangePasswordRequest;
 import com.service.auth.dto.LoginUserDto;
 import com.service.auth.dto.RegisterUserDto;
 import com.service.auth.enums.Role;
@@ -179,5 +180,20 @@ public class AuthenticationService {
         if ((p.equals("/") || p.contains("/login")) && roles.contains(Role.USER)) return Role.USER;
         return pickDefaultRole(roles);
       }
+      
+      public void changePassword(String email, ChangePasswordRequest req) {
+
+    	  var user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    	    // validar contraseña actual
+    	  if (!passwordEncoder.matches(req.currentPassword(), user.getPassword())) {
+    	        throw new RuntimeException("La contraseña actual es incorrecta");
+    	  }
+
+    	    // set nueva contraseña encriptada
+    	  user.setPassword(passwordEncoder.encode(req.newPassword()));
+    	  	userRepository.save(user);
+    	}
+
 
 }

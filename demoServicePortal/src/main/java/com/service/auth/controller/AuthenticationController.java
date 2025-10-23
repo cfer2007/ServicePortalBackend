@@ -1,11 +1,13 @@
 package com.service.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.service.auth.dto.ChangePasswordRequest;
 import com.service.auth.dto.LoginUserDto;
 import com.service.auth.dto.RefreshRequest;
 import com.service.auth.dto.RegisterUserDto;
@@ -71,4 +73,14 @@ public class AuthenticationController {
         return ResponseEntity.status(401).build();
       }
     }
+    
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestBody ChangePasswordRequest req,
+            Authentication authentication
+    ) {
+        authenticationService.changePassword(authentication.getName(), req);
+        return ResponseEntity.ok("Contraseña actualizada correctamente");
+    }
+
 }
