@@ -40,7 +40,7 @@ public class AuthenticationController {
       String path = request.getHeader("X-Login-Path");
       AuthOutcome out = authenticationService.authenticateAndSelectRole(dto, path);
 
-      String access  = jwtService.generateAccessToken(out.user().getEmail(), out.roles(), out.activeRole());
+      String access  = jwtService.generateAccessToken(out.user().getEmail(),out.user().getName(),out.roles(), out.activeRole());
       String refresh = jwtService.generateRefreshToken(out.user().getEmail());
 
       return ResponseEntity.ok(new LoginResponse()
@@ -61,7 +61,7 @@ public class AuthenticationController {
         String email = jwtService.extractUsername(rt);
         var roles  = authenticationService.getRolesByEmail(email);
         var active = authenticationService.pickDefaultRole(roles);
-        String newAccess = jwtService.generateAccessToken(email, roles, active);
+        String newAccess = jwtService.generateAccessToken(email,null, roles, active);
 
         return ResponseEntity.ok(new LoginResponse()
             .setToken(newAccess)

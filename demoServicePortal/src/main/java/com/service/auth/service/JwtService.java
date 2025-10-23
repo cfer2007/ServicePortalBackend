@@ -92,13 +92,13 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-    
+    /*
     public String generateToken(String subject, Set<Role> allRoles, Role activeRole) {
     	  Map<String, Object> claims = new java.util.HashMap<>();
     	  claims.put("roles", allRoles.stream().map(Role::name).toArray(String[]::new));
     	  claims.put("role", activeRole.name());
     	  return buildToken(claims, subject, jwtExpiration);
-    }
+    }*/
 
     @SuppressWarnings("deprecation")
 	private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
@@ -110,9 +110,10 @@ public class JwtService {
     	      .signWith(SignatureAlgorithm.HS256, getSignInKey())
     	      .compact();
     }
-    public String generateAccessToken(String subject, Set<Role> roles, Role activeRole) {
+    public String generateAccessToken(String subject, String name, Set<Role> roles, Role activeRole) {
     	Map<String,Object> claims = new HashMap<>();
     	claims.put("typ", "access");
+    	claims.put("name", name);
     	if (roles != null) claims.put("roles", roles.stream().map(Role::name).toArray(String[]::new));
     	if (activeRole != null) claims.put("role", activeRole.name());
     	return buildToken(claims, subject, jwtExpiration);

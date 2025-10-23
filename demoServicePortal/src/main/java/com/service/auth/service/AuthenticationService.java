@@ -99,17 +99,14 @@ public class AuthenticationService {
 
 
     public User authenticate(LoginUserDto input) {
-    	//verificar credenciales
-        authenticationManager.authenticate(
+    	authenticationManager.authenticate(
         		new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
                 )
         );
-        //obtener usuario
         User user = userRepository.findByEmail(input.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User nof found"));
         
-        // Validar rol
         if (input.getRole() != null && !user.getRoles().contains(input.getRole())) {
             throw new BadCredentialsException("Role mismatch");
         }
@@ -118,33 +115,23 @@ public class AuthenticationService {
     }   
     
     public AuthOutcome authenticateAndSelectRole(LoginUserDto input, String loginPathOrHint) {
-        // 1) Autentica credenciales
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
-        );
-
-        // 2) Carga usuario y roles reales
-        User user = userRepository.findByEmail(input.getEmail())
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword()));
+        User user = userRepository.findByEmail(input.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Set<Role> userRoles = new java.util.HashSet<>(user.getRoles()); // Set<Role>
 
         // 3) Determina área a partir de la ruta o del hint (no confiable)
         String src = (loginPathOrHint == null ? "" : loginPathOrHint).toLowerCase();
         Role hint = input.getRole(); // opcional; úsalo solo como pista
-        boolean professionalArea =
-            src.contains("/professional/login") || Role.PROFESSIONAL.equals(hint);
+        boolean professionalArea = src.contains("/professional/login") || Role.PROFESSIONAL.equals(hint);
 
-        // 4) Roles permitidos por área
         java.util.Set<Role> allowed = professionalArea
             ? java.util.Set.of(Role.ADMIN, Role.PROFESSIONAL)
             : java.util.Set.of(Role.USER);
 
-        // 5) Elegir rol ACTIVO con prioridad ADMIN > PROFESSIONAL > USER
         Role active = pickActiveRole(userRoles, allowed);
         if (active == null) throw new BadCredentialsException("Role mismatch for this area");
 
-        // 6) Reglas extra (opcional): admin corporativo
         if (active == Role.ADMIN && !isCorporateEmail(user.getEmail())) {
           throw new BadCredentialsException("Invalid admin email");
         }
@@ -159,26 +146,18 @@ public class AuthenticationService {
         return null;
       }
 
-      private boolean isCorporateEmail(String email) {
-        return email != null && email.toLowerCase().endsWith("@miempresa.com"); // ajusta dominio
-      }
+      private boolean isCorporateEmail(String email) {return email != null && email.toLowerCase().endsWith("@miempresa.com"); }
       
-   // --- Helpers de roles (wrappers simples) ---
-
-      /** Convierte los roles del usuario a Set<Role> sin duplicados, seguro para listas vacías. */
       private Set<Role> toRoleSet(User u) {
         if (u == null || u.getRoles() == null || u.getRoles().isEmpty()) {
           return EnumSet.noneOf(Role.class);
         }
-        // EnumSet requiere no vacío; usa HashSet primero y crea EnumSet si hay elementos
-        java.util.Set<Role> tmp = new java.util.HashSet<>(u.getRoles());
+        Set<Role> tmp = new java.util.HashSet<>(u.getRoles());
         return tmp.isEmpty() ? EnumSet.noneOf(Role.class) : EnumSet.copyOf(tmp);
       }
 
-      /** Carga roles por email como Set<Role>. */
       public Set<Role> getRolesByEmail(String email) {
-        User u = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        User u = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
         return toRoleSet(u);
       }
 
@@ -188,7 +167,6 @@ public class AuthenticationService {
         if (roles.contains(Role.ADMIN)) return Role.ADMIN;
         if (roles.contains(Role.PROFESSIONAL)) return Role.PROFESSIONAL;
         if (roles.contains(Role.USER)) return Role.USER;
-        // Fallback defensivo
         return roles.iterator().next();
       }
 
