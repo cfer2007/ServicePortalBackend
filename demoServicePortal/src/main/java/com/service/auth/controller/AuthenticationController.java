@@ -42,15 +42,21 @@ public class AuthenticationController {
       String path = request.getHeader("X-Login-Path");
       AuthOutcome out = authenticationService.authenticateAndSelectRole(dto, path);
 
-      String access  = jwtService.generateAccessToken(out.user().getEmail(),out.user().getName(),out.roles(), out.activeRole());
+      String access  = jwtService.generateAccessToken(
+              out.user().getEmail(),
+              out.user().getName(),
+              out.roles(),
+              out.activeRole(),
+              out.userRoleId()  // ✅ SE INCLUYE
+      );
+
       String refresh = jwtService.generateRefreshToken(out.user().getEmail());
 
       return ResponseEntity.ok(new LoginResponse()
           .setToken(access)
-          .setRefreshToken(refresh)                  // <- se entrega en login
+          .setRefreshToken(refresh)
           .setExpiresIn(jwtService.getExpirationTime()));
     }
-
     
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest req) {
@@ -60,19 +66,32 @@ public class AuthenticationController {
         if (jwtService.isTokenExpired(rt) || !jwtService.isRefreshToken(rt)) {
           return ResponseEntity.status(401).build();
         }
+
         String email = jwtService.extractUsername(rt);
         var roles  = authenticationService.getRolesByEmail(email);
         var active = authenticationService.pickDefaultRole(roles);
-        String newAccess = jwtService.generateAccessToken(email,null, roles, active);
+
+        // ✅ obtener el user_role_id correspondiente al activeRole
+        Long userRoleId = authenticationService.getUserRoleId(email, active);
+
+        // ✅ generar access token con userRoleId incluido
+        String newAccess = jwtService.generateAccessToken(
+                email,
+                null,       // aquí podrías traer el name si quieres
+                roles,
+                active,
+                userRoleId
+        );
 
         return ResponseEntity.ok(new LoginResponse()
             .setToken(newAccess)
             .setExpiresIn(jwtService.getExpirationTime())
-            .setRefreshToken(null)); // reusamos el MISMO refresh hasta su caducidad
+            .setRefreshToken(null)); // reusamos el mismo refresh
       } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
         return ResponseEntity.status(401).build();
       }
     }
+
     
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(

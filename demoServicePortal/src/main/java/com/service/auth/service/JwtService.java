@@ -110,14 +110,16 @@ public class JwtService {
     	      .signWith(SignatureAlgorithm.HS256, getSignInKey())
     	      .compact();
     }
-    public String generateAccessToken(String subject, String name, Set<Role> roles, Role activeRole) {
-    	Map<String,Object> claims = new HashMap<>();
-    	claims.put("typ", "access");
-    	claims.put("name", name);
-    	if (roles != null) claims.put("roles", roles.stream().map(Role::name).toArray(String[]::new));
-    	if (activeRole != null) claims.put("role", activeRole.name());
-    	return buildToken(claims, subject, jwtExpiration);
+    public String generateAccessToken(String subject, String name, Set<Role> roles, Role activeRole, Long userRoleId) {
+        Map<String,Object> claims = new HashMap<>();
+        claims.put("typ", "access");
+        claims.put("name", name);
+        if (roles != null) claims.put("roles", roles.stream().map(Role::name).toArray(String[]::new));
+        if (activeRole != null) claims.put("role", activeRole.name());
+        if (userRoleId != null) claims.put("userRoleId", userRoleId);
+        return buildToken(claims, subject, jwtExpiration);
     }
+
 
     public String generateRefreshToken(String subject) {
     	System.out.println("generateRefreshToken");

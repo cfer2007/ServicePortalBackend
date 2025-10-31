@@ -1,5 +1,6 @@
 package com.service.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.service.auth.model.User;
 
 import jakarta.persistence.Column;
@@ -9,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Table(name="client")
@@ -28,9 +30,11 @@ public class Client {
 	@Column
 	private String phone;
 	
-	@ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = true)
+	@OneToOne
+	@JoinColumn(name = "user_id")
+	@JsonIgnore
 	private User user;
+
 
 	public Long getClientId() {
 		return clientId;

@@ -5,19 +5,19 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.service.auth.enums.Role;
-
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Table(name = "users")
 @Entity
 public class User implements UserDetails {
     private static final long serialVersionUID = 1L;
 
-	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
@@ -28,103 +28,42 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String password;
-   
-    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role"})
-    )
-    @Column(name = "role")
-    private List<Role> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<UserRole> roles = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                    .map(role -> new SimpleGrantedAuthority(role.name()))
-                    .toList();
+                .map(userRole -> new SimpleGrantedAuthority(userRole.getRole().name()))
+                .collect(Collectors.toList());
     }
 
-    public String getPassword() {
-        return password;
-    }
+    @Override public String getPassword() { return password; }
+    @Override public String getUsername() { return email; }
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled() { return true; }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
+    public Integer getId() { return id; }
+    public User setId(Integer id) { this.id = id; return this; }
+    public String getName() { return name; }
+    public User setName(String name) { this.name = name; return this; }
+    public String getEmail() { return email; }
+    public User setEmail(String email) { this.email = email; return this; }
+    public User setPassword(String password) { this.password = password; return this; }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+	public Set<UserRole> getRoles() {
+		return roles;
+	}
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+	public void setRoles(Set<UserRole> roles) {
+		this.roles = roles;
+	}
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public User setId(Integer id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public User setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public User setEmail(String email) {
-        this.email = email;
-        return this;
-    }
-
-    public User setPassword(String password) {
-        this.password = password;
-        return this;
-    }
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
     
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public User setRoles(List<Role> roles) {
-        this.roles = roles;
-        return this;
-    }
-    /*
-	@Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", roles='" + roles + '\'' +
-                '}';
-    }*/
 }
-
