@@ -170,5 +170,25 @@ public class ReviewService {
         r.setProfessionalReply(reply);
         reviewRepo.save(r);
     }
+    public List<ReviewDTO> getAllPendingDisputes() {
+        return reviewRepo.findByStatus(ReviewStatus.PENDING_REVIEW)
+                .stream().map(ReviewDTO::from)
+                .toList();
+    }
+
+    @Transactional
+    public void resolveReview(Long reviewId, boolean remove) {
+        Review review = reviewRepo.findById(reviewId).orElseThrow(() -> new IllegalArgumentException("La reseña no existe"));
+
+        Appointment appt = review.getAppointment();
+
+        if (remove) {
+        	review.setStatus(ReviewStatus.REMOVED);
+            reviewRepo.save(review);
+        } else {
+            review.setStatus(ReviewStatus.ADMIN_APPROVED);
+            reviewRepo.save(review);
+        }
+    }
 
 }

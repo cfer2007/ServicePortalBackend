@@ -89,4 +89,20 @@ public class ReviewController {
         service.replyToReview(reviewId, professionalId, dto.reply);
         return ResponseEntity.ok("Respuesta agregada");
     }
+    
+    @GetMapping("/disputes")
+    public ResponseEntity<List<ReviewDTO>> getAllPendingDisputes() {
+    	System.out.println(service.getAllPendingDisputes().size());
+        return ResponseEntity.ok(service.getAllPendingDisputes());
+    }
+
+    @PostMapping("/admin/resolve/{reviewId}")
+    public ResponseEntity<?> resolveReview(
+            @PathVariable Long reviewId,
+            @RequestParam boolean remove) {
+
+        service.resolveReview(reviewId, remove);
+        return ResponseEntity.ok("Revisión procesada");
+    }
+
 }
