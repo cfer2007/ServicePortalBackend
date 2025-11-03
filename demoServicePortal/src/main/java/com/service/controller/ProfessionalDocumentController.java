@@ -114,7 +114,7 @@ class LegacyProfessionalDocumentController {
             try {
                 var auto = validationService.run(professionalId);
                 if (auto.documentsComplete && auto.filesReadable) {
-                    professional.setStatus(ProfileStatus.PENDING_REVIEW);
+                    professional.setStatus(ProfileStatus.PENDING_VERIFICATION);
                     professionalRepo.save(professional);
                 }
             } catch (Exception ignored) {}

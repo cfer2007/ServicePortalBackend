@@ -90,9 +90,7 @@ public class ProfessionalController {
 		System.out.println(professionId);
 		System.out.println(skillId);
 		System.out.println(keyword);
-        List list = repo.searchProfessionals(categoryId, professionId, skillId, keyword);
-        System.out.println(list.size());
-        return list;
+        return repo.searchProfessionals(categoryId, professionId, skillId, keyword);
     }
 
 }

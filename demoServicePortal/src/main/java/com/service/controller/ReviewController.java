@@ -1,40 +1,92 @@
 package com.service.controller;
 
-//package: com.service.controller
-import com.service.dto.review.*;
+import com.service.dto.ReplyDTO;
+import com.service.dto.ReviewDTO;
 import com.service.service.ReviewService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/admin/review")
-//@PreAuthorize("hasAnyRole('ADMIN','REVIEWER')")
+@RequestMapping("/reviews")
+@CrossOrigin(origins = "*")
 public class ReviewController {
 
-	@Autowired ReviewService reviewService;
-	
-	@GetMapping("/queue")
-	@PreAuthorize("hasAuthority('ADMIN')")
-	public Page<ReviewQueueItem> getQueue(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="10") int size, @RequestParam(required=false) String q) {
-		return reviewService.getQueue(page, size, q);
-	}
-	
-	@GetMapping("/bundle/{professionalId}")
-	@PreAuthorize("hasAuthority('ADMIN')")
-	public ProfessionalReviewDTO getBundle(@PathVariable Long professionalId) {
-		return reviewService.getBundle(professionalId);
-	}
-	
-	@PostMapping("/decision/{professionalId}")
-	@PreAuthorize("hasAuthority('ADMIN')")
-	public ResponseEntity<Void> decide(@PathVariable Long professionalId, @RequestBody ReviewDecisionRequest req, Authentication auth) {
-		//reviewService.decide(professionalId, req, auth.getName());
-		final String reviewer = (auth != null && auth.getName() != null) ? auth.getName() : "system";
-	    reviewService.decide(professionalId, req, reviewer);
-	    return ResponseEntity.noContent().build();
-	}
+    private final ReviewService service;
+
+    public ReviewController(ReviewService service) {
+        this.service = service;
+    }
+
+    // ✅ Crear reseña
+    @PostMapping
+    public ResponseEntity<ReviewDTO> create(@RequestBody ReviewDTO dto) {
+        ReviewDTO saved = service.create(dto);
+        return ResponseEntity.ok(saved);
+    }
+
+    // ✅ Editar reseña
+    @PutMapping("/{reviewId}")
+    public ResponseEntity<ReviewDTO> update(
+            @PathVariable Long reviewId,
+            @RequestBody ReviewDTO dto) {
+
+        ReviewDTO updated = service.update(reviewId, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    // ✅ Eliminar reseña
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<String> delete(
+            @PathVariable Long reviewId,
+            @RequestParam Long clientId) {
+
+        service.delete(reviewId, clientId);
+        return ResponseEntity.ok("Reseña eliminada");
+    }
+
+    // ✅ Obtener reseñas de un profesional
+    @GetMapping("/professional/{professionalId}")
+    public ResponseEntity<List<ReviewDTO>> getByProfessional(@PathVariable Long professionalId) {
+        List<ReviewDTO> list = service.getByProfessional(professionalId);
+        return ResponseEntity.ok(list);
+    }
+
+    // ✅ Obtener reseñas hechas por un cliente
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<ReviewDTO>> getByClient(@PathVariable Long clientId) {
+        List<ReviewDTO> list = service.getByClient(clientId);
+        return ResponseEntity.ok(list);
+    }
+
+    // ✅ Estadísticas (promedio y total)
+    @GetMapping("/stats/{professionalId}")
+    public ResponseEntity<?> getStats(@PathVariable Long professionalId) {
+        return ResponseEntity.ok(service.getStats(professionalId));
+    }
+    
+    @GetMapping("/appointment/{appointmentId}")
+    public ResponseEntity<ReviewDTO> getByAppointment(@PathVariable Long appointmentId) {
+        return ResponseEntity.ok(service.getByAppointmentId(appointmentId));
+    }
+
+    @PostMapping("/dispute/{reviewId}")
+    public ResponseEntity<?> disputeReview(
+            @PathVariable Long reviewId,
+            @RequestParam Long professionalId) {
+
+        service.requestReviewDispute(reviewId, professionalId);
+        return ResponseEntity.ok("Solicitud enviada para revisión");
+    }
+
+    @PostMapping("/reply/{reviewId}")
+    public ResponseEntity<?> replyReview(
+            @PathVariable Long reviewId,
+            @RequestParam Long professionalId,
+            @RequestBody ReplyDTO dto) {
+
+        service.replyToReview(reviewId, professionalId, dto.reply);
+        return ResponseEntity.ok("Respuesta agregada");
+    }
 }

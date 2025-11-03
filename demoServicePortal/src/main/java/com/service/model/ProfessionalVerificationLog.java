@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 
 import com.service.enums.ProfileStatus;
 
-@Entity @Table(name = "professional_review_log")
-public class ProfessionalReviewLog {
+@Entity @Table(name = "professional_verification_log")
+public class ProfessionalVerificationLog {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long ProfessionalReviewLogId;
+  private Long professionalVerificationLogId;
 
   @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "professional_id", nullable = false)
   private Professional professional;
@@ -26,15 +26,15 @@ public class ProfessionalReviewLog {
   @Column(nullable = false)
   private LocalDateTime decidedAt;
 
-  public Long getProfessionalReviewLogId() {
-	return ProfessionalReviewLogId;
-  }
+  public Long getProfessionalVerificationLogId() {
+	return professionalVerificationLogId;
+}
 
-  public void setProfessionalReviewLogId(Long professionalReviewLogId) {
-	ProfessionalReviewLogId = professionalReviewLogId;
-  }
+public void setProfessionalVerificationLogId(Long professionalVerificationLogId) {
+	this.professionalVerificationLogId = professionalVerificationLogId;
+}
 
-  public Professional getProfessional() {
+public Professional getProfessional() {
 	return professional;
   }
 

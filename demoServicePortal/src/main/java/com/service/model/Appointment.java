@@ -40,6 +40,9 @@ public class Appointment {
 	@Column(name = "status")
 	@Enumerated(EnumType.STRING)
 	private AppointmentStatus status;
+	
+	@Column(nullable = false)
+	private Boolean hasReview = Boolean.FALSE;
 
 	public Long getAppointmentId() {
 		return appointmentId;
@@ -87,5 +90,13 @@ public class Appointment {
 
 	public void setStatus(AppointmentStatus status) {
 		this.status = status;
+	}
+
+	public boolean isHasReview() {
+		return hasReview;
+	}
+
+	public void setHasReview(boolean hasReview) {
+		this.hasReview = hasReview;
 	}
 }
