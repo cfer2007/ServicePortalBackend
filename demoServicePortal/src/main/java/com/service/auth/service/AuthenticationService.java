@@ -25,6 +25,9 @@ import com.service.model.Professional;
 import com.service.repository.ClientRepository;
 import com.service.repository.ProfessionalRepository;
 
+// ✅ IMPORTANTE
+import com.service.notification.service.UserNotificationSettingsService;
+
 @Service
 public class AuthenticationService {
 
@@ -35,13 +38,17 @@ public class AuthenticationService {
     private final ClientRepository clientRepository;
     private final ProfessionalRepository professionalRepository;
 
+    // ✅ NUEVO
+    private final UserNotificationSettingsService notificationSettingsService;
+
     public AuthenticationService(
             UserRepository userRepository,
             UserRoleRepository userRoleRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             ClientRepository clientRepository,
-            ProfessionalRepository professionalRepository
+            ProfessionalRepository professionalRepository,
+            UserNotificationSettingsService notificationSettingsService // ✅ INYECTADO
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
@@ -49,6 +56,7 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
         this.clientRepository = clientRepository;
         this.professionalRepository = professionalRepository;
+        this.notificationSettingsService = notificationSettingsService; // ✅
     }
 
     public User signup(RegisterUserDto dto) {
@@ -76,15 +84,17 @@ public class AuthenticationService {
 
         if (!hasRole) {
             UserRole ur = new UserRole(user, requestedRole);
-            user.getRoles().add(ur);   // agrega al set
-            userRoleRepository.save(ur); // guarda en BD
+            user.getRoles().add(ur);
+            userRoleRepository.save(ur);
+
+            // ✅ Crear configuración de notificaciones automáticamente
+            notificationSettingsService.getOrCreate(ur.getUserRoleId());
         }
 
         ensureProfile(user, requestedRole);
 
         return user;
     }
-
 
     // ✅ Crea Client o Professional según rol
     private void ensureProfile(User user, Role role) {
@@ -110,23 +120,7 @@ public class AuthenticationService {
         }
     }
 
-    // ✅ LOGIN BÁSICO
-    public User authenticate(LoginUserDto input) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
-        );
-
-        User user = userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        if (input.getRole() != null &&
-                user.getRoles().stream().noneMatch(r -> r.getRole() == input.getRole())) {
-            throw new BadCredentialsException("Role mismatch");
-        }
-
-        return user;
-    }
-
+    // ✅ LOGIN que selecciona rol activo según request
     public AuthOutcome authenticateAndSelectRole(LoginUserDto input, String loginPathOrHint) {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
@@ -135,7 +129,6 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // ✅ Roles del usuario
         Set<UserRole> roleEntities = user.getRoles();
         Set<Role> userRoles = roleEntities.stream()
                 .map(UserRole::getRole)
@@ -153,19 +146,21 @@ public class AuthenticationService {
         Role active = pickActiveRole(userRoles, allowed);
         if (active == null) throw new BadCredentialsException("Role mismatch");
 
-        // ✅ Asegurar que ADMIN use un correo corporativo (tu lógica)
+        // ✅ Asegurar email corporativo si el rol es Admin
         if (active == Role.ADMIN && !isCorporateEmail(user.getEmail())) {
             throw new BadCredentialsException("Invalid admin email");
         }
 
-        // ✅ Buscar el user_role_id EXACTO
+        // ✅ Obtener user_role_id EXACTO
         Long userRoleId = roleEntities.stream()
                 .filter(r -> r.getRole() == active)
                 .findFirst()
-                .map(r -> r.getUserRoleId())        // ID de la fila user_role
+                .map(UserRole::getUserRoleId)
                 .orElse(null);
 
-        // ✅ DEVOLVER el ID del user_role activo
+        // ✅ Crear settings automáticos si no existen
+        notificationSettingsService.getOrCreate(userRoleId);
+
         return new AuthOutcome(user, userRoles, active, userRoleId);
     }
 
@@ -181,7 +176,7 @@ public class AuthenticationService {
         return email != null && email.toLowerCase().endsWith("@miempresa.com");
     }
 
-    // ✅ OBTENER ROLES DESDE BD
+    // ✅ ROLES DESDE BD
     public Set<Role> getRolesByEmail(String email) {
         User u = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
@@ -191,7 +186,6 @@ public class AuthenticationService {
                 .collect(Collectors.toSet());
     }
 
-    // ✅ ROL POR DEFECTO SEGÚN PRIORIDAD
     public Role pickDefaultRole(Set<Role> roles) {
         if (roles == null || roles.isEmpty()) return Role.USER;
         if (roles.contains(Role.ADMIN)) return Role.ADMIN;
@@ -200,19 +194,7 @@ public class AuthenticationService {
         return roles.iterator().next();
     }
 
-    public Role pickDefaultRole(Set<Role> roles, String loginPathOrHint) {
-        if (roles == null || roles.isEmpty()) return Role.USER;
-
-        String p = loginPathOrHint == null ? "" : loginPathOrHint.toLowerCase();
-
-        if (p.contains("/admin") && roles.contains(Role.ADMIN)) return Role.ADMIN;
-        if (p.contains("/professional") && roles.contains(Role.PROFESSIONAL)) return Role.PROFESSIONAL;
-        if ((p.equals("/") || p.contains("/login")) && roles.contains(Role.USER)) return Role.USER;
-
-        return pickDefaultRole(roles);
-    }
-
-    // ✅ CAMBIO DE CONTRASEÑA
+    // ✅ Cambiar contraseña
     public void changePassword(String email, ChangePasswordRequest req) {
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -224,7 +206,7 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(req.newPassword()));
         userRepository.save(user);
     }
-    
+
     public Long getUserRoleId(String email, Role activeRole) {
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
@@ -232,8 +214,24 @@ public class AuthenticationService {
         return user.getRoles().stream()
                 .filter(r -> r.getRole() == activeRole)
                 .findFirst()
-                .map(r -> r.getUserRoleId())  // retorna user_role_id
+                .map(r -> r.getUserRoleId())
                 .orElse(null);
     }
 
+    // ✅ LOGIN básico (no selecciona rol)
+    public User authenticate(LoginUserDto input) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
+        );
+
+        User user = userRepository.findByEmail(input.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (input.getRole() != null &&
+                user.getRoles().stream().noneMatch(r -> r.getRole() == input.getRole())) {
+            throw new BadCredentialsException("Role mismatch");
+        }
+
+        return user;
+    }
 }

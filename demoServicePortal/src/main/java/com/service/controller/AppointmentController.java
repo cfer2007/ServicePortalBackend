@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,24 +17,42 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.service.dto.AppointmentDTO;
-import com.service.enums.AppointmentStatus;
+import com.service.dto.AppointmentRequest;
 import com.service.exception.ResourceNotFoundException;
 import com.service.model.Appointment;
 import com.service.repository.AppointmentRepository;
+import com.service.service.AppointmentService;
 
 @RestController
 @RequestMapping("/appointment")
 public class AppointmentController {
 	@Autowired
 	private AppointmentRepository repo;
+	@Autowired
+	private  AppointmentService appointmentService;
 	
 	@PostMapping("/add")
 	@PreAuthorize("hasAuthority('USER')")
-	public ResponseEntity<Appointment> setAppointment(@RequestBody Appointment appointment) {
-		appointment.setStatus(AppointmentStatus.PENDING);
-		Appointment app = repo.save(appointment);
-		return ResponseEntity.ok(app);
+	public ResponseEntity<?> create(@RequestBody AppointmentRequest req) {
+	    try {
+	        Appointment app = appointmentService.createAppointment(req);
+	        return ResponseEntity.ok(app);
+	    } catch (RuntimeException e) {
+	        return ResponseEntity.badRequest().body(e.getMessage());
+	    }
 	}
+	
+	@PatchMapping("/status/{id}")
+	@PreAuthorize("hasAnyAuthority('USER','PROFESSIONAL')")
+	public ResponseEntity<?> changeStatus(
+	        @PathVariable Long id,
+	        @RequestBody AppointmentRequest req
+	) {
+	    appointmentService.updateStatus(id, req.getStatus(), req.getActorUserRoleId());
+	    return ResponseEntity.ok(id);
+	}
+
+
 	
 	@PostMapping("/add/blocked")
 	@PreAuthorize("hasAuthority('PROFESSIONAL')")
@@ -69,7 +88,7 @@ public class AppointmentController {
 		List<Appointment> list = repo.getclientRecords(id, statusList);
 	    return ResponseEntity.ok(list);
 	}
-	
+	/*
 	@PutMapping("/edit/{id}")
 	@PreAuthorize("hasAnyAuthority('USER','PROFESSIONAL')")
 	public ResponseEntity<?> editAppointment(@PathVariable Long id, @RequestBody AppointmentDTO dto){
@@ -77,5 +96,20 @@ public class AppointmentController {
 		dto.updateEntity(existing);
 		Appointment updated = repo.save(existing);
 		return ResponseEntity.ok(updated.getAppointmentId());
+	}*/
+	@PutMapping("/edit/{id}")
+	@PreAuthorize("hasAnyAuthority('USER','PROFESSIONAL')")
+	public ResponseEntity<?> editAppointment(
+	        @PathVariable Long id,
+	        @RequestBody AppointmentRequest req
+	) {
+	    Appointment existing = repo.findById(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("Appointment not found", 1001));
+
+	    req.updateEntity(existing);
+	    Appointment updated = repo.save(existing);
+
+	    return ResponseEntity.ok(updated.getAppointmentId());
 	}
+
 }

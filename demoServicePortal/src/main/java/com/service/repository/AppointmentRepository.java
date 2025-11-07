@@ -13,13 +13,25 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>{
 	@Query(value = "SELECT * FROM appointment WHERE professional_id = :id AND STR_TO_DATE(appointment_date, '%d/%m/%Y %H:%i') > NOW() AND status IN (:status)", nativeQuery = true)
 	List<Appointment> getActiveAppointmentsByProfessional(@Param("id") Long id, @Param("status") List<String> status);
 	
-	@Query(value = " SELECT * FROM appointment WHERE professional_id = :id AND status IN (:status) ", nativeQuery = true)
+	@Query(value = "SELECT * FROM appointment WHERE professional_id = :id AND status IN (:status) ", nativeQuery = true)
 	List<Appointment> getProfessionalRecords(@Param("id")Long id, @Param("status") List<String>  status);
 
 	
 	@Query(value = "SELECT * FROM appointment WHERE client_id = :id AND STR_TO_DATE(appointment_date, '%d/%m/%Y %H:%i') > NOW() AND status IN (:status)", nativeQuery = true)
 	List<Appointment> getActiveAppointmentsByClient(@Param("id") Long id, @Param("status") List<String> status);
 	
-	@Query(value = " SELECT * FROM appointment WHERE client_id = :id AND status IN (:status) ", nativeQuery = true)
+	@Query(value = "SELECT * FROM appointment WHERE client_id = :id AND status IN (:status) ", nativeQuery = true)
 	List<Appointment> getclientRecords(@Param("id")Long id, @Param("status") List<String>  status);
+	
+	@Query("""
+		    SELECT COUNT(a) > 0
+		    FROM appointment a
+		    WHERE a.professional.professionalId = :professionalId
+		      AND a.appointmentDate = :appointmentDate
+		""")
+		boolean existsByProfessionalAndDate(
+		        @Param("professionalId") Long professionalId,
+		        @Param("appointmentDate") String appointmentDate
+		);
+
 }
