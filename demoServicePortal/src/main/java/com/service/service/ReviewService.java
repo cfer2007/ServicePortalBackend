@@ -119,6 +119,18 @@ public class ReviewService {
                 .map(ReviewDTO::from)
                 .toList();
     }
+    
+ // ✅ ressenias de profesional, Solo visibles (para clientes)
+    public List<ReviewDTO> getVisibleByProfessional(Long professionalId) {
+        return reviewRepo
+                .findByProfessionalProfessionalIdAndStatusOrderByCreatedAtDesc(
+                        professionalId,
+                        ReviewStatus.VISIBLE
+                )
+                .stream()
+                .map(ReviewDTO::from)
+                .toList();
+    }
 
     // ✅ Obtener reseñas hechas por un cliente
     public List<ReviewDTO> getByClient(Long clientId) {

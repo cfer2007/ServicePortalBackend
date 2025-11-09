@@ -52,6 +52,12 @@ public class ReviewController {
         List<ReviewDTO> list = service.getByProfessional(professionalId);
         return ResponseEntity.ok(list);
     }
+    
+ // ✅ Solo visibles (clientes)
+    @GetMapping("/professional/{professionalId}/visible")
+    public ResponseEntity<List<ReviewDTO>> getVisibleByProfessional(@PathVariable Long professionalId) {
+        return ResponseEntity.ok(service.getVisibleByProfessional(professionalId));
+    }
 
     // ✅ Obtener reseñas hechas por un cliente
     @GetMapping("/client/{clientId}")

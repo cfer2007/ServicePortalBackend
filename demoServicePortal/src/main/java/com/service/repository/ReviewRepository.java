@@ -11,6 +11,12 @@ import java.util.Optional;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByProfessionalProfessionalIdOrderByCreatedAtDesc(Long professionalId);
     
+ // ✅ SOLO VISIBLES (para clientes)
+    List<Review> findByProfessionalProfessionalIdAndStatusOrderByCreatedAtDesc(
+            Long professionalId,
+            ReviewStatus status
+    );
+    
     List<Review> findByClientClientIdOrderByCreatedAtDesc(Long clientId);
     
     Optional<Review> findByAppointmentAppointmentId(Long appointmentId);
