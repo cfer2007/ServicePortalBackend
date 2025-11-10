@@ -85,12 +85,14 @@ public class ProfessionalController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long professionId,
             @RequestParam(required = false) Long skillId,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String loggedEmail) {
 		System.out.println(categoryId);
 		System.out.println(professionId);
 		System.out.println(skillId);
 		System.out.println(keyword);
-        return repo.searchProfessionals(categoryId, professionId, skillId, keyword);
+		System.out.println(loggedEmail);
+        return repo.searchProfessionals(categoryId, professionId, skillId, keyword,loggedEmail);
     }
 
 }

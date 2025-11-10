@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.service.dto.AppointmentDTO;
 import com.service.dto.AppointmentRequest;
 import com.service.exception.ResourceNotFoundException;
 import com.service.model.Appointment;

@@ -13,8 +13,8 @@ public class ProfessionalService {
     @Autowired
     private ProfessionalRepository professionalRepository;
 
-    public List<Professional> searchProfessionals(Long categoryId, Long professionId, Long skillId, String keyword) {
-        return professionalRepository.searchProfessionals(categoryId, professionId, skillId, keyword);
+    public List<Professional> searchProfessionals(Long categoryId, Long professionId, Long skillId, String keyword, String loggedEmail) {
+        return professionalRepository.searchProfessionals(categoryId, professionId, skillId, keyword, loggedEmail);
     }
 }
 

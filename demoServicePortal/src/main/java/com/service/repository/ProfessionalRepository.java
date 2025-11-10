@@ -54,12 +54,14 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 		        LOWER(p.last_name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
 		        LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
 		      )
+		      AND u.email <> :loggedEmail
 		    """, nativeQuery = true)
 		List<Professional> searchProfessionals(
 		    @Param("categoryId") Long categoryId,
 		    @Param("professionId") Long professionId,
 		    @Param("skillId") Long skillId,
-		    @Param("keyword") String keyword
+		    @Param("keyword") String keyword,
+		    @Param("loggedEmail") String loggedEmail
 		);
 
 
