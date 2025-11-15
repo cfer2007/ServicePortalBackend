@@ -74,6 +74,7 @@ public class ProfessionalVerificationService {
         di.fileName   =  d.getFileName();
         di.contentType=  d.getContentType();
         di.url = d.getUrl(); 
+        di.statusReason = d.getStatusReason(); 
         return di;
       }).toList();
 
@@ -147,6 +148,7 @@ public class ProfessionalVerificationService {
           }
 
           doc.setStatus(DocumentStatus.REQUIRES_CHANGES);
+          doc.setStatusReason(comment); 
           documentRepo.save(doc);
         }
 

@@ -48,6 +48,9 @@ public class ProfessionalDocument {
 
 	@Column
 	private String contentType;
+	
+	@Column
+	private String statusReason;
 
 	public String getFileName() { return fileName; }
 	public void setFileName(String fileName) { this.fileName = fileName; }
@@ -102,10 +105,10 @@ public class ProfessionalDocument {
 	public void setDate(Instant date) {
 		this.date = date;
 	}
-	/*public String getStatusReason() {
+	public String getStatusReason() {
 		return statusReason;
 	}
 	public void setStatusReason(String statusReason) {
 		this.statusReason = statusReason;
-	}*/
+	}
 }
